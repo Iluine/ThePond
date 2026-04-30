@@ -62,6 +62,8 @@ export default {
       borderRadius: {
         // Phone shells, gros containers
         'phone': '36px',
+        // Pills et chips (maquettes : 999px partout)
+        'pill': '999px',
       },
     },
   },

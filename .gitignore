@@ -49,3 +49,8 @@ yarn-error.log*
 # ─── Caddy (local dev artifacts) ─────────────────────────────────
 caddy_data/
 caddy_config/
+
+# ─── Playwright (screenshots, traces, MCP outputs) ───────────────
+.playwright-mcp/
+test-results/
+playwright-report/
