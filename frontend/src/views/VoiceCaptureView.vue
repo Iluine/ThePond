@@ -15,9 +15,11 @@
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
+import { useUploadQueueStore } from '../stores/uploadQueue'
 
 const router = useRouter()
 const userStore = useUserStore()
+const uploadQueue = useUploadQueueStore()
 
 const MAX_SECONDS = 60
 const WAVEFORM_BARS = 60
@@ -215,33 +217,21 @@ function stopRecording() {
   }
 }
 
-async function handleStop() {
-  state.value = 'uploading'
+function handleStop() {
+  // Optimistic UI : enqueue + navigation immédiate
   const mimeType = recorder?.mimeType ?? 'audio/webm'
   const ext = extensionFor(mimeType)
   const blob = new Blob(chunks, { type: mimeType })
   const file = new File([blob], `voice-${Date.now()}.${ext}`, { type: mimeType })
   const duration = elapsed.value
+  const captionText = caption.value.trim() || undefined
 
-  try {
-    const formData = new FormData()
-    formData.append('user_id', userStore.userId!)
-    formData.append('duration_seconds', duration.toFixed(2))
-    if (caption.value.trim()) {
-      formData.append('caption', caption.value.trim())
-    }
-    formData.append('file', file)
-    const res = await fetch('/api/voice', { method: 'POST', body: formData })
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}))
-      throw new Error(body.error || `HTTP ${res.status}`)
-    }
-    cleanup()
-    router.push('/confirmation?type=voice')
-  } catch (err) {
-    errorMessage.value = err instanceof Error ? err.message : String(err)
-    state.value = 'error'
-  }
+  const item = uploadQueue.enqueue(file, 'voice', {
+    durationSeconds: duration,
+    caption: captionText,
+  })
+  cleanup()
+  router.push(`/confirmation?type=voice&itemId=${item.id}`)
 }
 
 function cleanup() {

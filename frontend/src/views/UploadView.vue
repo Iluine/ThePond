@@ -23,11 +23,13 @@ import MareTVPill from '../components/MareTVPill.vue'
 import ChallengeBanner from '../components/ChallengeBanner.vue'
 import { useUserStore } from '../stores/user'
 import { useSnapshotStore } from '../stores/snapshot'
+import { useUploadQueueStore } from '../stores/uploadQueue'
 import type { DuckColor } from '../types/duck'
 
 const router = useRouter()
 const userStore = useUserStore()
 const snapshotStore = useSnapshotStore()
+const uploadQueue = useUploadQueueStore()
 
 // Si pas authentifié, on renvoie sur Welcome (cas d'accès direct par URL).
 onMounted(() => {
@@ -54,42 +56,21 @@ const userColor = computed<DuckColor>(
   () => (userStore.user?.duck_color as DuckColor) ?? 'yellow',
 )
 
-// ─── BARBOTER : upload photo inline ────────────────────────────
+// ─── BARBOTER : optimistic UI — enqueue + push immédiat ──────
 const photoInput = ref<HTMLInputElement | null>(null)
-const photoUploading = ref(false)
-const photoError = ref<string | null>(null)
 
 function pickPhoto() {
-  if (photoUploading.value) return
   photoInput.value?.click()
 }
 
-async function onPhotoSelected(event: Event) {
+function onPhotoSelected(event: Event) {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
-  photoError.value = null
-  photoUploading.value = true
-
-  try {
-    const formData = new FormData()
-    formData.append('user_id', userStore.userId!)
-    formData.append('file', file)
-    const res = await fetch('/api/media', {
-      method: 'POST',
-      body: formData,
-    })
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}))
-      throw new Error(body.error || `HTTP ${res.status}`)
-    }
-    router.push('/confirmation?type=photo')
-  } catch (err) {
-    photoError.value = err instanceof Error ? err.message : String(err)
-  } finally {
-    photoUploading.value = false
-    if (photoInput.value) photoInput.value.value = ''
-  }
+  // Le store lance l'upload en background. La confirmation observe le statut.
+  const item = uploadQueue.enqueue(file, 'photo')
+  router.push(`/confirmation?type=photo&itemId=${item.id}`)
+  if (photoInput.value) photoInput.value.value = ''
 }
 
 // ─── Défi en cours (V1 placeholder, vraies données en P1) ─────
@@ -140,20 +121,16 @@ const currentChallenge = {
         href="#"
       />
 
-      <!-- BARBOTER : photo native -->
+      <!-- BARBOTER : photo native, navigation immédiate vers /confirmation -->
       <div>
-        <PrimaryButton
-          size="xl"
-          :disabled="photoUploading"
-          @click="pickPhoto"
-        >
+        <PrimaryButton size="xl" @click="pickPhoto">
           <template #icon>
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
               <path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z" />
               <circle cx="12" cy="13" r="4" />
             </svg>
           </template>
-          {{ photoUploading ? 'En cours…' : 'BARBOTER' }}
+          BARBOTER
         </PrimaryButton>
         <input
           ref="photoInput"
@@ -163,12 +140,6 @@ const currentChallenge = {
           class="hidden"
           @change="onPhotoSelected"
         />
-        <p
-          v-if="photoError"
-          class="font-mono text-[11px] text-coral-deep text-center mt-2"
-        >
-          Upload échoué · {{ photoError }}
-        </p>
       </div>
 
       <div class="grid grid-cols-2 gap-3">

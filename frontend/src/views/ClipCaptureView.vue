@@ -15,9 +15,11 @@
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
+import { useUploadQueueStore } from '../stores/uploadQueue'
 
 const router = useRouter()
 const userStore = useUserStore()
+const uploadQueue = useUploadQueueStore()
 
 const MAX_SECONDS = 15
 const VIDEO_BITRATE = 5_000_000
@@ -156,30 +158,18 @@ function tick() {
   }
 }
 
-async function handleStop() {
-  state.value = 'uploading'
+function handleStop() {
+  // Optimistic UI : on enqueue dans la queue store et on file vers
+  // /confirmation tout de suite. Le store gère le POST en background.
   const mimeType = recorder?.mimeType ?? 'video/mp4'
   const ext = extensionFor(mimeType)
   const blob = new Blob(chunks, { type: mimeType })
   const file = new File([blob], `clip-${Date.now()}.${ext}`, { type: mimeType })
   const duration = elapsed.value
 
-  try {
-    const formData = new FormData()
-    formData.append('user_id', userStore.userId!)
-    formData.append('duration_seconds', duration.toFixed(2))
-    formData.append('file', file)
-    const res = await fetch('/api/clips', { method: 'POST', body: formData })
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({}))
-      throw new Error(body.error || `HTTP ${res.status}`)
-    }
-    cleanup()
-    router.push('/confirmation?type=clip')
-  } catch (err) {
-    errorMessage.value = err instanceof Error ? err.message : String(err)
-    state.value = 'error'
-  }
+  const item = uploadQueue.enqueue(file, 'clip', { durationSeconds: duration })
+  cleanup()
+  router.push(`/confirmation?type=clip&itemId=${item.id}`)
 }
 
 function cleanup() {

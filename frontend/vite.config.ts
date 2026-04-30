@@ -34,10 +34,11 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // Permet d'appeler /api/* et /events depuis le front en dev
-      // sans CORS, le backend tourne sur :3000 en parallèle.
-      '/api':    { target: 'http://localhost:3000', changeOrigin: true },
-      '/events': { target: 'http://localhost:3000', changeOrigin: true },
+      // Permet d'appeler /api/*, /events et /uploads depuis le front en
+      // dev sans CORS, le backend tourne sur :3000 en parallèle.
+      '/api':     { target: 'http://localhost:3000', changeOrigin: true },
+      '/events':  { target: 'http://localhost:3000', changeOrigin: true },
+      '/uploads': { target: 'http://localhost:3000', changeOrigin: true },
     },
   },
 })

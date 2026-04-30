@@ -39,12 +39,8 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/confirmation',
     name: 'confirmation',
-    component: StubView,
-    meta: {
-      title: 'Splash !',
-      screen: 'ConfirmationView',
-      implementedAt: 9,
-    },
+    component: () => import('../views/ConfirmationView.vue'),
+    meta: { title: 'Splash !' },
   },
 
   // ─── Galerie & lecteurs ─────────────────────────────────────

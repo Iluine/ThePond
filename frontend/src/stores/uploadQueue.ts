@@ -1,5 +1,5 @@
 /**
- * useUploadQueueStore — queue locale d'uploads.
+ * useUploadQueueStore — queue locale d'uploads avec runner intégré.
  *
  * Persistance hybride :
  *   - Les MÉTADONNÉES (id, type, statut, taille, ...) sont en localStorage
@@ -12,11 +12,13 @@
  *     basculent sur statut 'lost' — l'UI peut alors proposer de
  *     re-sélectionner le fichier.
  *
- * La logique d'envoi HTTP elle-même (POST /api/media etc.) vivra dans
- * un composable useUploadQueue() au prompt 8, qui consommera ce store.
+ * enqueue() lance immédiatement runUpload() en fire-and-forget pour que
+ * la navigation /confirmation soit instantanée (optimistic UI). Le statut
+ * passe pending → uploading → done|failed sans bloquer l'appelant.
  */
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { useUserStore } from './user'
 
 export type UploadType = 'photo' | 'clip' | 'voice'
 
@@ -27,6 +29,14 @@ export type UploadStatus =
   | 'failed'    // erreur réseau ou serveur, retry possible
   | 'lost'      // page reloadée pendant le upload, File perdu
 
+/** Réponse minimale renvoyée par le backend après un upload réussi.
+ *  Les filenames servent à construire l'URL des thumbnails côté client. */
+export type UploadServerResponse = {
+  id: string
+  filename?: string
+  thumb_filename?: string
+}
+
 export type UploadItem = {
   id: string
   type: UploadType
@@ -35,9 +45,26 @@ export type UploadItem = {
   /** ISO timestamp */
   createdAt: string
   errorMessage?: string
+  /** Pour les clips et vocaux. */
+  durationSeconds?: number
+  /** Pour les vocaux uniquement (≤ 280 chars validé côté backend). */
+  caption?: string
+  /** Présent une fois status === 'done'. Persiste à travers les reloads. */
+  serverResponse?: UploadServerResponse
+}
+
+export type EnqueueOptions = {
+  durationSeconds?: number
+  caption?: string
 }
 
 const STORAGE_KEY = 'thepond.uploadQueue.v1'
+
+const ENDPOINT_FOR: Record<UploadType, string> = {
+  photo: '/api/media',
+  clip: '/api/clips',
+  voice: '/api/voice',
+}
 
 export const useUploadQueueStore = defineStore('uploadQueue', () => {
   // ─── Files (mémoire seule) ──────────────────────────────────
@@ -57,7 +84,7 @@ export const useUploadQueueStore = defineStore('uploadQueue', () => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items.value))
     } catch {
-      // localStorage indisponible ou plein — on garde en mémoire
+      /* localStorage indisponible ou plein */
     }
   }
 
@@ -65,7 +92,6 @@ export const useUploadQueueStore = defineStore('uploadQueue', () => {
   const items = ref<UploadItem[]>(loadMetadata())
 
   // Au boot, tout ce qui était en transit a perdu son File.
-  // On le marque 'lost' pour que l'UI propose un retry manuel.
   for (const item of items.value) {
     if (item.status === 'pending' || item.status === 'uploading') {
       item.status = 'lost'
@@ -79,16 +105,22 @@ export const useUploadQueueStore = defineStore('uploadQueue', () => {
   const failed    = computed(() => items.value.filter((i) => i.status === 'failed'))
   const lost      = computed(() => items.value.filter((i) => i.status === 'lost'))
   const done      = computed(() => items.value.filter((i) => i.status === 'done'))
-
-  /** Items actifs : pending + uploading + failed + lost. Done est exclu
-   *  (l'UI peut filtrer dessus pour afficher "X uploads à finaliser"). */
   const active    = computed(() =>
     items.value.filter((i) => i.status !== 'done'),
   )
 
   // ─── Actions ────────────────────────────────────────────────
 
-  function enqueue(file: File, type: UploadType): UploadItem {
+  /**
+   * Ajoute un fichier à la queue et lance immédiatement son upload en
+   * background. L'appelant peut naviguer vers /confirmation tout de suite
+   * et observer l'évolution du statut via getById().
+   */
+  function enqueue(
+    file: File,
+    type: UploadType,
+    opts?: EnqueueOptions,
+  ): UploadItem {
     const id = crypto.randomUUID()
     const item: UploadItem = {
       id,
@@ -100,40 +132,111 @@ export const useUploadQueueStore = defineStore('uploadQueue', () => {
       },
       status: 'pending',
       createdAt: new Date().toISOString(),
+      durationSeconds: opts?.durationSeconds,
+      caption: opts?.caption,
     }
     fileMap.set(id, file)
     items.value.push(item)
     persist()
+    // Fire-and-forget : on ne bloque pas l'appelant.
+    void runUpload(id)
     return item
   }
 
-  /** Récupère le File associé à un item. undefined si statut 'lost'
-   *  (le File n'a pas survécu au reload). */
+  function getById(id: string): UploadItem | undefined {
+    return items.value.find((i) => i.id === id)
+  }
+
   function getFile(id: string): File | undefined {
     return fileMap.get(id)
   }
 
-  function setStatus(id: string, status: UploadStatus, errorMessage?: string): void {
+  function setStatus(
+    id: string,
+    status: UploadStatus,
+    errorMessage?: string,
+  ): void {
     const item = items.value.find((i) => i.id === id)
     if (!item) return
     item.status = status
     item.errorMessage = errorMessage
     if (status === 'done') {
-      // Libère la référence au File une fois confirmé côté serveur
+      // Libère le File mais GARDE le serverResponse pour l'UI
       fileMap.delete(id)
     }
     persist()
   }
 
-  /** Retire un item de la queue. */
+  /** Lance l'upload pour un item. POST sur l'endpoint approprié,
+   *  met à jour le statut et stocke la réponse serveur en cas de succès. */
+  async function runUpload(id: string): Promise<void> {
+    const item = items.value.find((i) => i.id === id)
+    if (!item) return
+    const file = fileMap.get(id)
+    if (!file) {
+      setStatus(id, 'lost')
+      return
+    }
+
+    const userStore = useUserStore()
+    const userId = userStore.userId
+    if (!userId) {
+      setStatus(id, 'failed', 'pas de canard authentifié')
+      return
+    }
+
+    setStatus(id, 'uploading')
+
+    try {
+      const formData = new FormData()
+      formData.append('user_id', userId)
+      formData.append('file', file)
+      if ((item.type === 'clip' || item.type === 'voice') && item.durationSeconds !== undefined) {
+        formData.append('duration_seconds', item.durationSeconds.toFixed(2))
+      }
+      if (item.type === 'voice' && item.caption) {
+        formData.append('caption', item.caption)
+      }
+
+      const res = await fetch(ENDPOINT_FOR[item.type], {
+        method: 'POST',
+        body: formData,
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error || `HTTP ${res.status}`)
+      }
+      const serverResponse = (await res.json()) as UploadServerResponse
+
+      const itemRef = items.value.find((i) => i.id === id)
+      if (itemRef) {
+        itemRef.serverResponse = serverResponse
+      }
+      setStatus(id, 'done')
+    } catch (err) {
+      setStatus(id, 'failed', err instanceof Error ? err.message : String(err))
+    }
+  }
+
+  /** Relance un upload qui a échoué. Le File doit toujours être en
+   *  mémoire (sinon le statut serait déjà 'lost'). */
+  function retry(id: string): void {
+    const item = items.value.find((i) => i.id === id)
+    if (!item || (item.status !== 'failed' && item.status !== 'lost')) return
+    if (!fileMap.has(id)) {
+      setStatus(id, 'lost')
+      return
+    }
+    item.errorMessage = undefined
+    void runUpload(id)
+  }
+
   function dismiss(id: string): void {
     fileMap.delete(id)
     items.value = items.value.filter((i) => i.id !== id)
     persist()
   }
 
-  /** Vide complètement la queue. Utile pour clear() quand le canard
-   *  se déconnecte. */
   function clear(): void {
     fileMap.clear()
     items.value = []
@@ -149,8 +252,10 @@ export const useUploadQueueStore = defineStore('uploadQueue', () => {
     done,
     active,
     enqueue,
+    getById,
     getFile,
     setStatus,
+    retry,
     dismiss,
     clear,
   }
