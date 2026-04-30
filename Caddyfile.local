@@ -1,0 +1,24 @@
+# Caddyfile.local — dev sans TLS, localhost:8080
+# Utilisable avec : caddy run --config Caddyfile.local
+# (Le frontend est servi par Vite en mode dev sur :5173, donc ce reverse-proxy
+#  expose juste l'API + les events à un client local.)
+
+:8080 {
+    encode zstd gzip
+
+    @backend {
+        path /api/* /events
+    }
+    handle @backend {
+        reverse_proxy localhost:3000
+    }
+
+    handle {
+        reverse_proxy localhost:5173
+    }
+
+    log {
+        output stdout
+        format console
+    }
+}

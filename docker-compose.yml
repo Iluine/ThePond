@@ -1,0 +1,57 @@
+# The Pond — stack production (NAS Synology DS718+).
+# Volumes mappés sur /volume1/docker/thepond/ par défaut (override via env).
+
+services:
+  thepond-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: thepond-backend
+    restart: unless-stopped
+    environment:
+      BIND_ADDRESS: 0.0.0.0:3000
+      DB_PATH: /data/thepond.db
+      UPLOADS_PATH: /data/uploads
+      THEME_PATH: /themes/duck-pond/theme.ron
+      WITNESS_SECRET: ${WITNESS_SECRET:?set WITNESS_SECRET in .env}
+      RUST_LOG: ${RUST_LOG:-info,sqlx=warn}
+    volumes:
+      - ${POND_DATA_DIR:-/volume1/docker/thepond}/data:/data
+      - ./themes:/themes:ro
+    networks:
+      - thepond
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  thepond-caddy:
+    image: caddy:2
+    container_name: thepond-caddy
+    restart: unless-stopped
+    depends_on:
+      thepond-backend:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      POND_DOMAIN: ${POND_DOMAIN:?set POND_DOMAIN in .env}
+      DUCKDNS_TOKEN: ${DUCKDNS_TOKEN:?set DUCKDNS_TOKEN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./frontend/dist:/srv:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - thepond
+
+networks:
+  thepond:
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:

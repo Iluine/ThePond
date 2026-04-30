@@ -1,0 +1,36 @@
+# Caddyfile — production (NAS Synology)
+# TLS via DNS-01 DuckDNS. Reverse-proxy /api/* + /events vers le backend Rust,
+# tout le reste en static SPA fallback.
+#
+# Variables d'environnement attendues (compose les fournit) :
+#   - POND_DOMAIN     ex. mariage-marie-thomas.duckdns.org
+#   - DUCKDNS_TOKEN   le token API DuckDNS
+
+{
+    email pond@example.invalid
+    acme_dns duckdns {env.DUCKDNS_TOKEN}
+}
+
+{$POND_DOMAIN} {
+    encode zstd gzip
+
+    # Backend : routes API + flux SSE
+    @backend {
+        path /api/* /events
+    }
+    handle @backend {
+        reverse_proxy thepond-backend:3000
+    }
+
+    # Frontend statique (build Vite copié dans /srv au build)
+    handle {
+        root * /srv
+        try_files {path} /index.html
+        file_server
+    }
+
+    log {
+        output file /var/log/caddy/access.log
+        format console
+    }
+}
