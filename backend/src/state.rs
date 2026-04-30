@@ -14,4 +14,7 @@ pub struct AppState {
     pub hub: Arc<SnapshotHub>,
     pub pseudo: Arc<PseudoConfig>,
     pub storage: Storage,
+    /// Token public dérivé de WITNESS_SECRET, comparé contre ?token=
+    /// par l'extractor WitnessAuth.
+    pub witness_token: Arc<String>,
 }

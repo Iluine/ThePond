@@ -67,12 +67,8 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/orchestration',
     name: 'orchestration',
-    component: StubView,
-    meta: {
-      title: 'Orchestration',
-      screen: 'OrchestrationView',
-      implementedAt: 12,
-    },
+    component: () => import('../views/OrchestrationView.vue'),
+    meta: { title: 'Orchestration' },
   },
 
   // ─── Mare TV ────────────────────────────────────────────────

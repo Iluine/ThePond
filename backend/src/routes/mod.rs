@@ -4,5 +4,6 @@
 pub mod clips;
 pub mod events;
 pub mod media;
+pub mod orchestration;
 pub mod users;
 pub mod voice;

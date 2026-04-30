@@ -1,5 +1,5 @@
 use axum::{
-    routing::{get, patch, post},
+    routing::{delete, get, patch, post},
     Json, Router,
 };
 use serde::Serialize;
@@ -15,6 +15,7 @@ mod routes;
 mod services;
 mod state;
 
+use crate::services::auth;
 use crate::services::broadcast::SnapshotHub;
 use crate::services::storage::Storage;
 use crate::state::AppState;
@@ -42,25 +43,32 @@ async fn main() -> anyhow::Result<()> {
     db::run_migrations(&pool).await?;
     tracing::info!(db = %cfg.db_path.display(), "database ready");
 
-    // Storage : crée les sous-dossiers et le placeholder clip si absents.
     let storage = Storage::new(cfg.uploads_path.clone());
     storage.ensure_dirs()?;
     tracing::info!(uploads = %cfg.uploads_path.display(), "storage ready");
 
-    // Hub SSE — spawn la tâche debounce + broadcast.
     let hub = SnapshotHub::spawn(pool.clone());
     tracing::info!("snapshot hub ready");
+
+    // ─── Witness HMAC token ──────────────────────────────────
+    let secret = auth::load_or_generate_secret();
+    let witness_token = auth::witness_token(&secret);
+    tracing::info!(
+        token = %witness_token,
+        "witness token (give témoins this URL) → /orchestration?token={}",
+        witness_token
+    );
 
     let app_state = AppState {
         pool: pool.clone(),
         hub,
         pseudo: Arc::new(cfg.pseudo.clone()),
         storage: storage.clone(),
+        witness_token: Arc::new(witness_token),
     };
 
     let event_name = cfg.theme.event_name.clone();
 
-    // Sous-router /api/* — toutes les routes d'API sont sous celui-ci.
     let api = Router::new()
         .route("/events", get(routes::events::events_handler))
         .route("/pseudo", get(routes::users::sample_pseudo))
@@ -69,6 +77,19 @@ async fn main() -> anyhow::Result<()> {
         .route("/media", post(routes::media::upload_photo))
         .route("/clips", post(routes::clips::upload_clip))
         .route("/voice", post(routes::voice::upload_voice))
+        // Orchestration : protégé par WitnessAuth extractor
+        .route("/orchestration/state", get(routes::orchestration::state_handler))
+        .route("/orchestration/phases", post(routes::orchestration::create_phase))
+        .route("/orchestration/phases/reorder", post(routes::orchestration::reorder_phases))
+        .route(
+            "/orchestration/phases/:id",
+            patch(routes::orchestration::update_phase).delete(routes::orchestration::delete_phase),
+        )
+        .route(
+            "/orchestration/phases/:id/trigger",
+            post(routes::orchestration::trigger_phase),
+        )
+        .route("/orchestration/export", get(routes::orchestration::export_handler))
         .with_state(app_state);
 
     let app = Router::new()
@@ -86,9 +107,6 @@ async fn main() -> anyhow::Result<()> {
             }),
         )
         .nest("/api", api)
-        // Sert les fichiers uploadés (originaux + thumbnails).
-        // En prod, Caddy peut servir directement depuis le volume si
-        // on veut court-circuiter le backend pour les statiques.
         .nest_service("/uploads", ServeDir::new(&cfg.uploads_path));
 
     let addr: SocketAddr = cfg.bind_address.parse()?;
