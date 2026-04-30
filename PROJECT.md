@@ -449,16 +449,15 @@ ThePond/
 │       └── assets/
 │           └── duck.svg        # template du canard
 │
-└── docs/
-    ├── design-system-v0.2.html
-    └── screenshots/
-        ├── slideshow-day.png
-        ├── slideshow-night.png
-        ├── welcome.png
-        ├── upload.png
-        ├── confirmation.png
-        ├── gallery-mosaic.png
-        └── ...
+└── design/
+    ├── INDEX.md                      # inventaire commenté des HTML
+    ├── The Pond - Design System.html # référence canonique du design system v0.2
+    ├── Slideshow TV v2.html
+    ├── Welcome v2.html
+    ├── Upload v2.html
+    ├── Confirmation.html
+    ├── Mosaic 4 screens.html
+    └── Mosaic 6 screens.html
 ```
 
 ## Phases de développement
@@ -522,7 +521,7 @@ ThePond/
 
 ## Design system v0.2
 
-Le design system complet est documenté dans `docs/design-system-v0.2.html`.
+Le design system complet est documenté dans `design/The Pond - Design System.html`.
 Tokens CSS dans `frontend/src/styles/tokens.css` (variables CSS).
 
 ### Palette (9 couleurs)
@@ -591,5 +590,5 @@ le prop. La couronne, si présente, mord le crâne de 2-3px (overlap).
 ## Liens utiles
 
 - Dépôt : https://github.com/Iluine/ThePond
-- Maquettes Claude Design : voir `docs/screenshots/`
-- Spec design system : voir `docs/design-system-v0.2.html`
+- Maquettes Claude Design : voir `design/` (inventaire dans `design/INDEX.md`)
+- Spec design system : voir `design/The Pond - Design System.html`

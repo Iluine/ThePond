@@ -19,6 +19,32 @@ Tu vas bootstrapper le projet The Pond, une PWA de partage de contenus
 pour un mariage. Lis d'abord PROJECT.md à la racine pour comprendre le contexte
 complet, le vocabulaire, la stack, et l'architecture.
 
+PRÉREQUIS ABSOLU AVANT D'ÉCRIRE LA MOINDRE LIGNE DE CODE :
+
+Tu dois OUVRIR ET LIRE INTÉGRALEMENT chacun des fichiers HTML du dossier
+design/ avant de générer le moindre fichier de code. Utilise l'outil Read
+sur chacun :
+
+- design/INDEX.md (inventaire commenté, statut de chaque maquette)
+- design/The Pond - Design System.html (SOURCE DE VÉRITÉ pour tokens.css
+  et tailwind.config.js : palette exacte, typographies, box-shadows,
+  composants signatures, SVG des canards)
+- design/Welcome v2.html
+- design/Upload v2.html
+- design/Confirmation.html
+- design/Slideshow TV v2.html
+- design/Mosaic 4 screens.html
+- design/Mosaic 6 screens.html
+
+Les couleurs (codes hex), espacements, rayons, ombres, structures DOM,
+et SVG des canards doivent être EXTRAITS DIRECTEMENT du HTML, pas
+réinventés ni approximés. Si une valeur dans le HTML diffère de celle
+listée dans PROJECT.md, le HTML fait foi (PROJECT.md est un résumé).
+
+Cette lecture n'est pas optionnelle. Toute génération de tokens.css,
+tailwind.config.js, ou composant Vue avant cette lecture est un échec
+du bootstrap.
+
 OBJECTIF DE CETTE SESSION : avoir un Hello World qui tourne en local avec :
 - Backend Rust/Axum qui démarre, expose un endpoint de health check, lit
   la config depuis un fichier RON, se connecte à SQLite avec migrations
