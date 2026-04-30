@@ -7,29 +7,16 @@ import StubView from '../views/StubView.vue'
  * vue arrive à son prompt thématique, on remplace `component: StubView`
  * par `component: () => import('../views/XxxView.vue')`.
  *
- * Note : le `/` reste sur HomeView (le showcase design system) jusqu'au
- * prompt 7. À ce moment WelcomeView prendra `/`, et le showcase migrera
- * sur `/dev/showcase` (ou disparaîtra du build prod selon l'arbitrage).
+ * Au prompt 7, WelcomeView a pris `/` (point d'entrée du parcours invité)
+ * et le showcase design system a migré sur `/dev`.
  */
 const routes: RouteRecordRaw[] = [
-  // ─── Showcase (à déplacer ou retirer au prompt 7) ───────────
-  {
-    path: '/',
-    name: 'home',
-    component: () => import('../views/HomeView.vue'),
-    meta: { title: 'Showcase' },
-  },
-
   // ─── Parcours invité ────────────────────────────────────────
   {
-    path: '/welcome',
+    path: '/',
     name: 'welcome',
-    component: StubView,
-    meta: {
-      title: 'Bienvenue',
-      screen: 'WelcomeView',
-      implementedAt: 7,
-    },
+    component: () => import('../views/WelcomeView.vue'),
+    meta: { title: 'Bienvenue' },
   },
   {
     path: '/upload',
@@ -136,6 +123,14 @@ const routes: RouteRecordRaw[] = [
       screen: 'MareTVInstructionsView',
       implementedAt: 13,
     },
+  },
+
+  // ─── Showcase design system (dev seulement) ─────────────────
+  {
+    path: '/dev',
+    name: 'dev-showcase',
+    component: () => import('../views/HomeView.vue'),
+    meta: { title: 'Dev showcase' },
   },
 
   // ─── Erreur catch-all ───────────────────────────────────────

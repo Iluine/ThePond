@@ -57,12 +57,13 @@ export const useUserStore = defineStore('user', () => {
 
   /**
    * Inscription d'un nouveau canard. Le client génère le UUID, le serveur
-   * répond avec le pseudo et confirme la création.
-   * À implémenter côté backend au prompt 6 (POST /api/users).
+   * persiste avec le pseudo fourni (issu d'un GET /api/pseudo précédent)
+   * ou en génère un si aucun n'est passé.
    */
   async function register(opts: {
     duck_color: DuckColor
     custom_name?: string
+    pseudo?: string
   }): Promise<Canard> {
     const id = crypto.randomUUID()
 
@@ -73,6 +74,7 @@ export const useUserStore = defineStore('user', () => {
         id,
         duck_color: opts.duck_color,
         custom_name: opts.custom_name ?? null,
+        pseudo: opts.pseudo ?? null,
       }),
     })
     if (!res.ok) {

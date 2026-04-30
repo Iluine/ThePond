@@ -63,6 +63,7 @@ async fn main() -> anyhow::Result<()> {
     // Sous-router /api/* — toutes les routes d'API sont sous celui-ci.
     let api = Router::new()
         .route("/events", get(routes::events::events_handler))
+        .route("/pseudo", get(routes::users::sample_pseudo))
         .route("/users", post(routes::users::create_user))
         .route("/users/:id", patch(routes::users::update_user))
         .route("/media", post(routes::media::upload_photo))

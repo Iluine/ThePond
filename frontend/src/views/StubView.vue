@@ -36,7 +36,7 @@ const promptN = computed(() => route.meta.implementedAt as number | undefined)
     </div>
 
     <RouterLink
-      to="/"
+      to="/dev"
       class="font-sans text-pond-mid hover:text-pond-deep underline underline-offset-4"
     >
       ← retour au showcase

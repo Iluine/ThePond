@@ -24,6 +24,24 @@ pub struct CreateUserBody {
     pub id: String,
     pub duck_color: String,
     pub custom_name: Option<String>,
+    /// Pseudo choisi par le client (issu d'un GET /api/pseudo précédent).
+    /// Si absent ou invalide, le serveur en génère un.
+    pub pseudo: Option<String>,
+}
+
+#[derive(Debug, serde::Serialize)]
+pub struct PseudoResponse {
+    pub pseudo: String,
+}
+
+/// GET /api/pseudo — génère un pseudo sans persister. Utilisé par
+/// WelcomeView pour le bouton "Reroule" : chaque clic = un nouvel
+/// échantillonnage. Sur PLONGER, le client renvoie le dernier pseudo
+/// affiché dans POST /api/users.
+pub async fn sample_pseudo(State(state): State<AppState>) -> Json<PseudoResponse> {
+    Json(PseudoResponse {
+        pseudo: pseudo::generate(&state.pseudo),
+    })
 }
 
 pub async fn create_user(
@@ -46,8 +64,12 @@ pub async fn create_user(
         }
     }
 
-    // ─── Génération du pseudo + insert ──────────────────────
-    let pseudo = pseudo::generate(&state.pseudo);
+    // ─── Pseudo : utilise celui du client si valide, sinon génère ──
+    let pseudo = match body.pseudo.as_deref().map(str::trim).filter(|s| !s.is_empty()) {
+        Some(p) if p.len() <= 100 => p.to_string(),
+        Some(_) => return Err(AppError::BadRequest("pseudo too long (max 100)".into())),
+        None => pseudo::generate(&state.pseudo),
+    };
     let now = Utc::now().to_rfc3339();
 
     sqlx::query(
