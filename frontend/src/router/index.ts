@@ -53,22 +53,14 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/clip/:id',
     name: 'clip-player',
-    component: StubView,
-    meta: {
-      title: 'Cancan',
-      screen: 'ClipPlayerView',
-      implementedAt: 11,
-    },
+    component: () => import('../views/ClipPlayerView.vue'),
+    meta: { title: 'Cancan' },
   },
   {
     path: '/voice/:id',
     name: 'voice-player',
-    component: StubView,
-    meta: {
-      title: 'Coin-coin',
-      screen: 'VoicePlayerView',
-      implementedAt: 11,
-    },
+    component: () => import('../views/VoicePlayerView.vue'),
+    meta: { title: 'Coin-coin' },
   },
 
   // ─── Témoins ────────────────────────────────────────────────
