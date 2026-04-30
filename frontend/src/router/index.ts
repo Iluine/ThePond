@@ -75,22 +75,14 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/mare-tv',
     name: 'mare-tv',
-    component: StubView,
-    meta: {
-      title: 'Mare TV',
-      screen: 'MareTVView',
-      implementedAt: 13,
-    },
+    component: () => import('../views/MareTVView.vue'),
+    meta: { title: 'Mare TV' },
   },
   {
     path: '/mare-tv/instructions',
     name: 'mare-tv-instructions',
-    component: StubView,
-    meta: {
-      title: 'Mare TV · instructions',
-      screen: 'MareTVInstructionsView',
-      implementedAt: 13,
-    },
+    component: () => import('../views/MareTVInstructionsView.vue'),
+    meta: { title: 'Mare TV · instructions' },
   },
 
   // ─── Showcase design system (dev seulement) ─────────────────
