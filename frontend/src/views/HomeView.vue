@@ -7,6 +7,23 @@ import PrimaryButton from '../components/PrimaryButton.vue'
 import SecondaryButton from '../components/SecondaryButton.vue'
 import PondCounter from '../components/PondCounter.vue'
 import MareTVPill from '../components/MareTVPill.vue'
+import Duck from '../components/Duck.vue'
+import Pond, { type PondDuck } from '../components/Pond.vue'
+
+// ─── Helpers pour la démo Pond ──────────────────────────────────
+function makeFakeDucks(n: number): PondDuck[] {
+  // Distribution v0.2 : 80% yellow, 15% white, 4% blue, 1% rainbow
+  const out: PondDuck[] = []
+  for (let i = 0; i < n; i++) {
+    const r = Math.random()
+    const color = r < 0.80 ? 'yellow' : r < 0.95 ? 'white' : r < 0.99 ? 'blue' : 'rainbow'
+    out.push({ id: i, color })
+  }
+  return out
+}
+
+const teaserDucks = makeFakeDucks(15)
+const largeDucks = makeFakeDucks(30)
 </script>
 
 <template>
@@ -19,6 +36,135 @@ import MareTVPill from '../components/MareTVPill.vue'
         Design system v0.2 · Showcase
       </p>
     </header>
+
+    <!-- ─── Pond ────────────────────────────────────────────────── -->
+    <section class="space-y-4">
+      <h2 class="font-display text-2xl text-pond-deep">Pond</h2>
+
+      <!-- Mini teaser 348×100 (Welcome v2) -->
+      <div class="p-5 bg-cream-deep rounded-2xl border border-cream-line space-y-3">
+        <div class="font-mono text-[10px] uppercase tracking-wider text-ink-soft">
+          Teaser · 348×100 · jour · couple visible
+        </div>
+        <div class="flex justify-center">
+          <Pond :ducks="teaserDucks" />
+        </div>
+        <p class="font-mono text-[10px] text-ink-soft text-center">
+          {{ teaserDucks.length }} canards barbotent · couple au centre
+        </p>
+      </div>
+
+      <!-- Pond plus grand 600×220 -->
+      <div class="p-5 bg-cream-deep rounded-2xl border border-cream-line space-y-3">
+        <div class="font-mono text-[10px] uppercase tracking-wider text-ink-soft">
+          Mare étendue · 600×220 · jour
+        </div>
+        <div class="flex justify-center overflow-x-auto">
+          <Pond :ducks="largeDucks" :width="600" :height="220" />
+        </div>
+      </div>
+
+      <!-- Mode nuit (Mare TV) -->
+      <div class="p-5 bg-cream-deep rounded-2xl border border-cream-line space-y-3">
+        <div class="font-mono text-[10px] uppercase tracking-wider text-ink-soft">
+          Mode nuit · 600×220 · glow auto · couple champagne
+        </div>
+        <div class="flex justify-center overflow-x-auto">
+          <Pond :ducks="largeDucks" :width="600" :height="220" night-mode />
+        </div>
+      </div>
+
+      <!-- Sans couple -->
+      <div class="p-5 bg-cream-deep rounded-2xl border border-cream-line space-y-3">
+        <div class="font-mono text-[10px] uppercase tracking-wider text-ink-soft">
+          Sans couple · zone centrale ouverte
+        </div>
+        <div class="flex justify-center">
+          <Pond :ducks="teaserDucks" :couple-visible="false" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Duck ────────────────────────────────────────────────── -->
+    <section class="space-y-4">
+      <h2 class="font-display text-2xl text-pond-deep">Duck</h2>
+
+      <!-- Les 4 variantes de couleur -->
+      <div class="p-5 bg-cream-deep rounded-2xl border border-cream-line space-y-4">
+        <div class="font-mono text-[10px] uppercase tracking-wider text-ink-soft">
+          4 variantes · ratio v0.2 (80 / 15 / 4 / 1)
+        </div>
+        <div class="flex items-end justify-around gap-4 flex-wrap">
+          <div class="flex flex-col items-center gap-2">
+            <Duck color="yellow" />
+            <span class="font-mono text-[10px] uppercase text-ink-soft">yellow · 80%</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <Duck color="white" />
+            <span class="font-mono text-[10px] uppercase text-ink-soft">white · 15%</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <Duck color="blue" />
+            <span class="font-mono text-[10px] uppercase text-ink-soft">blue · 4%</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <Duck color="rainbow" />
+            <span class="font-mono text-[10px] uppercase text-ink-soft">rainbow · 1%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Le couple : 2 ducks crowned 140px -->
+      <div class="p-5 bg-cream-deep rounded-2xl border border-cream-line space-y-4">
+        <div class="font-mono text-[10px] uppercase tracking-wider text-ink-soft">
+          Couple · 2 crowned 140px
+        </div>
+        <div class="flex items-end justify-center gap-2">
+          <Duck color="yellow" :size="140" crowned />
+          <Duck color="white" :size="140" crowned />
+        </div>
+      </div>
+
+      <!-- Glow contre fond pond-deep (mode nuit Mare TV) -->
+      <div class="p-5 bg-pond-deep rounded-2xl space-y-4">
+        <div class="font-mono text-[10px] uppercase tracking-wider text-pond-light">
+          Glow · mode nuit Mare TV
+        </div>
+        <div class="flex items-end justify-around gap-4 flex-wrap">
+          <div class="flex flex-col items-center gap-2">
+            <Duck color="yellow" :size="64" glow />
+            <span class="font-mono text-[10px] uppercase text-pond-light">invité jaune</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <Duck color="white" :size="64" glow />
+            <span class="font-mono text-[10px] uppercase text-pond-light">invité blanc</span>
+          </div>
+          <div class="flex flex-col items-center gap-2">
+            <Duck color="blue" :size="64" glow />
+            <span class="font-mono text-[10px] uppercase text-pond-light">invité bleu</span>
+          </div>
+          <div class="flex flex-col items-end gap-2">
+            <div class="flex items-end gap-1">
+              <Duck color="yellow" :size="100" crowned glow />
+              <Duck color="white" :size="100" crowned glow />
+            </div>
+            <span class="font-mono text-[10px] uppercase text-pond-light">couple champagne</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Variations de tailles -->
+      <div class="p-5 bg-cream-deep rounded-2xl border border-cream-line space-y-4">
+        <div class="font-mono text-[10px] uppercase tracking-wider text-ink-soft">
+          Tailles · 24 / 56 (default) / 140
+        </div>
+        <div class="flex items-end justify-center gap-6">
+          <Duck color="yellow" :size="24" />
+          <Duck color="yellow" />
+          <Duck color="yellow" :size="140" />
+        </div>
+      </div>
+    </section>
 
     <!-- ─── PondCounter ─────────────────────────────────────────── -->
     <section class="space-y-4">
@@ -128,7 +274,7 @@ import MareTVPill from '../components/MareTVPill.vue'
 
     <footer class="text-center pt-8 pb-4">
       <p class="font-mono text-[10px] uppercase tracking-widest text-ink-soft">
-        Bootstrap · Prompt 1 · Design system
+        Bootstrap · Prompt 3 · Pond.vue (la mare)
       </p>
     </footer>
   </main>
