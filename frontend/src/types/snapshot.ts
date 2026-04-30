@@ -50,7 +50,9 @@ export type SnapshotCounts = {
 export type Snapshot = {
   /** ISO timestamp serveur — utile pour calculer le drift d'horloge client. */
   server_time: string
-  phase_current: Phase
+  /** Palier en cours. null tant qu'aucun palier n'a démarré
+   *  (ex. avant 19h00 le jour J, ou en environnement de dev sans seed). */
+  phase_current: Phase | null
   phase_visible: Phase | null
   phases_all: Phase[]
   media_visible: Media[]

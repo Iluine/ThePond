@@ -1,10 +1,16 @@
 use axum::{routing::get, Json, Router};
 use serde::Serialize;
 use std::net::SocketAddr;
+use std::sync::Arc;
 
 mod config;
 mod db;
 mod error;
+mod models;
+mod routes;
+mod services;
+
+use crate::services::broadcast::SnapshotHub;
 
 #[derive(Serialize)]
 struct Health {
@@ -29,7 +35,16 @@ async fn main() -> anyhow::Result<()> {
     db::run_migrations(&pool).await?;
     tracing::info!(db = %cfg.db_path.display(), "database ready");
 
+    // Hub SSE — spawn la tâche debounce + broadcast.
+    let hub = SnapshotHub::spawn(pool.clone());
+    tracing::info!("snapshot hub ready");
+
     let event_name = cfg.theme.event_name.clone();
+
+    // Sous-router pour /api/* — toutes les routes d'API montent ici.
+    let api = Router::new()
+        .route("/events", get(routes::events::events_handler))
+        .with_state(hub);
 
     let app = Router::new()
         .route(
@@ -45,11 +60,14 @@ async fn main() -> anyhow::Result<()> {
                 }
             }),
         )
-        .with_state(pool);
+        .nest("/api", api);
 
     let addr: SocketAddr = cfg.bind_address.parse()?;
     tracing::info!(%addr, "the pond is listening");
     let listener = tokio::net::TcpListener::bind(addr).await?;
     axum::serve(listener, app).await?;
+
+    // Garder ce drop explicit pour bien signaler que le pool ferme proprement
+    drop(pool);
     Ok(())
 }

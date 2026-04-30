@@ -42,6 +42,10 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 uuid = { version = "1", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 
+# SSE / streaming
+async-stream = "0.3"
+futures-core = "0.3"
+
 [profile.release]
 lto = "thin"
 codegen-units = 1

@@ -139,7 +139,7 @@ const largeDucks = makeFakeDucks(30)
         </div>
 
         <!-- snapshotStore -->
-        <div class="flex items-center justify-between gap-3 flex-wrap">
+        <div class="space-y-1">
           <div class="font-mono text-xs">
             <span class="text-ink-soft">snapshot</span> ·
             <span :class="snapshotStore.connected ? 'text-green' : 'text-coral-deep'">
@@ -147,8 +147,34 @@ const largeDucks = makeFakeDucks(30)
             </span>
             ·
             <span class="text-ink-soft">
-              {{ snapshotStore.snapshot ? 'loaded' : 'null (SSE prompt 5)' }}
+              {{ snapshotStore.snapshot ? 'loaded' : 'null (waiting first event)' }}
             </span>
+          </div>
+          <div v-if="snapshotStore.snapshot" class="font-mono text-[11px] text-ink-soft pl-2 leading-relaxed">
+            <div>
+              server_time: <span class="text-pond-deep">{{ snapshotStore.serverTime }}</span>
+            </div>
+            <div>
+              phase_current:
+              <span :class="snapshotStore.phaseCurrent ? 'text-pond-deep' : 'text-ink-soft'">
+                {{ snapshotStore.phaseCurrent?.name ?? 'null' }}
+              </span>
+              · phase_visible:
+              <span :class="snapshotStore.phaseVisible ? 'text-pond-deep' : 'text-ink-soft'">
+                {{ snapshotStore.phaseVisible?.name ?? 'null' }}
+              </span>
+            </div>
+            <div>
+              phases_all: {{ snapshotStore.phasesAll.length }} ·
+              media_visible: {{ snapshotStore.mediaVisible.length }} ·
+              media_recent_for_tv: {{ snapshotStore.mediaRecentForTv.length }}
+            </div>
+            <div v-if="snapshotStore.counts">
+              counts · users {{ snapshotStore.counts.total_users }}
+              · posts {{ snapshotStore.counts.total_posts }}
+              · visible {{ snapshotStore.counts.posts_visible }}
+              · pending {{ snapshotStore.counts.posts_pending }}
+            </div>
           </div>
         </div>
 
@@ -418,7 +444,7 @@ const largeDucks = makeFakeDucks(30)
 
     <footer class="text-center pt-8 pb-4">
       <p class="font-mono text-[10px] uppercase tracking-widest text-ink-soft">
-        Bootstrap · Prompt 4 · Routing & stores Pinia
+        Bootstrap · Prompt 5 · SSE backend + useEventStream
       </p>
     </footer>
   </main>
