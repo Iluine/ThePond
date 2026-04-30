@@ -7,7 +7,6 @@
 //! laisser le client dans un état périmé silencieusement.
 
 use std::convert::Infallible;
-use std::sync::Arc;
 use std::time::Duration;
 
 use async_stream::stream;
@@ -16,11 +15,12 @@ use axum::response::sse::{Event, KeepAlive, Sse};
 use futures_core::stream::Stream;
 use tokio::sync::broadcast::error::RecvError;
 
-use crate::services::broadcast::SnapshotHub;
+use crate::state::AppState;
 
 pub async fn events_handler(
-    State(hub): State<Arc<SnapshotHub>>,
+    State(state): State<AppState>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
+    let hub = state.hub.clone();
     let mut rx = hub.subscribe();
     let initial = hub.compute_snapshot().await;
 

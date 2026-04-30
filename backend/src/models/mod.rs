@@ -7,7 +7,9 @@
 pub mod media;
 pub mod phase;
 pub mod snapshot;
+pub mod user;
 
 pub use media::Media;
 pub use phase::Phase;
 pub use snapshot::{Snapshot, SnapshotCounts};
+pub use user::Canard;

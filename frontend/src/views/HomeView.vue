@@ -28,9 +28,10 @@ const stubRoutes = router
       (a.meta.implementedAt as number) - (b.meta.implementedAt as number),
   )
 
-/** Mock register sans appeler le backend (l'endpoint POST /api/users
- *  n'arrive qu'au prompt 6). On simule juste un Canard local pour
- *  valider que userStore.user devient réactif. */
+import { ref } from 'vue'
+
+/** Mock register : Canard local seulement, pas d'appel backend. Utile
+ *  pour démontrer la réactivité des composants même sans serveur. */
 function mockRegister() {
   const fakeCanard: Canard = {
     id: crypto.randomUUID(),
@@ -38,13 +39,28 @@ function mockRegister() {
     duck_color: 'yellow',
     created_at: new Date().toISOString(),
   }
-  // On bypass register() (qui ferait un POST), on écrit directement
-  // dans le state pour la démo.
   userStore.$patch({ user: fakeCanard })
   try {
     localStorage.setItem('thepond.user.v1', JSON.stringify(fakeCanard))
   } catch {
     /* noop */
+  }
+}
+
+/** Real register : appelle POST /api/users (prompt 6). Le backend
+ *  génère le pseudo + crée la row + déclenche un broadcast SSE qui
+ *  fait monter snapshotStore.counts.total_users. */
+const realRegisterError = ref<string | null>(null)
+const realRegisterPending = ref(false)
+async function realRegister() {
+  realRegisterError.value = null
+  realRegisterPending.value = true
+  try {
+    await userStore.register({ duck_color: 'yellow' })
+  } catch (err) {
+    realRegisterError.value = err instanceof Error ? err.message : String(err)
+  } finally {
+    realRegisterPending.value = false
   }
 }
 
@@ -120,7 +136,7 @@ const largeDucks = makeFakeDucks(30)
               {{ userStore.isAuthenticated ? userStore.displayName : 'null' }}
             </span>
           </div>
-          <div class="flex gap-2">
+          <div class="flex gap-2 flex-wrap">
             <button
               type="button"
               class="font-mono text-[10px] uppercase px-2 py-1 rounded-pill border border-cream-line bg-cream"
@@ -130,12 +146,23 @@ const largeDucks = makeFakeDucks(30)
             </button>
             <button
               type="button"
+              class="font-mono text-[10px] uppercase px-2 py-1 rounded-pill border border-pond-mid/40 bg-pond-pale text-pond-deep disabled:opacity-50"
+              :disabled="realRegisterPending"
+              @click="realRegister"
+            >
+              {{ realRegisterPending ? 'registering…' : 'register (real)' }}
+            </button>
+            <button
+              type="button"
               class="font-mono text-[10px] uppercase px-2 py-1 rounded-pill border border-coral-line bg-coral-soft text-coral-deep"
               @click="userStore.clear()"
             >
               clear
             </button>
           </div>
+        </div>
+        <div v-if="realRegisterError" class="font-mono text-[10px] text-coral-deep pl-2">
+          register failed · {{ realRegisterError }}
         </div>
 
         <!-- snapshotStore -->
@@ -444,7 +471,7 @@ const largeDucks = makeFakeDucks(30)
 
     <footer class="text-center pt-8 pb-4">
       <p class="font-mono text-[10px] uppercase tracking-widest text-ink-soft">
-        Bootstrap · Prompt 5 · SSE backend + useEventStream
+        Bootstrap · Prompt 6 · routes auth + upload
       </p>
     </footer>
   </main>

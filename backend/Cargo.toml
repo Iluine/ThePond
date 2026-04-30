@@ -12,10 +12,10 @@ path = "src/main.rs"
 
 [dependencies]
 # HTTP / async runtime
-axum = "0.7"
+axum = { version = "0.7", features = ["multipart"] }
 tokio = { version = "1", features = ["full"] }
 tower = "0.5"
-tower-http = { version = "0.6", features = ["trace", "cors"] }
+tower-http = { version = "0.6", features = ["trace", "cors", "fs"] }
 
 # Database
 sqlx = { version = "0.8", features = [
@@ -45,6 +45,12 @@ chrono = { version = "0.4", features = ["serde"] }
 # SSE / streaming
 async-stream = "0.3"
 futures-core = "0.3"
+
+# Image processing (photo thumbnails)
+image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
+
+# Random pseudo generation
+rand = "0.8"
 
 [profile.release]
 lto = "thin"
