@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>The Pond — Diaporama TV (jour & nuit) · v2</title>
+<meta name="viewport" content="width=4040">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pond-deep:#0E4F6B;
+    --pond-deeper:#062E40;
+    --pond-mid:#3E8AA8;
+    --pond-light:#A9D8E5;
+    --pond-pale:#E6F3F8;
+    --cream:#FAF3E3;
+    --cream-deep:#F2E8CF;
+    --duck:#FFC93C;
+    --duck-deep:#F2B400;
+    --champagne:#E8C77A;
+    --champagne-deep:#C9A347;
+    --ink:#1F2933;
+    --ink-soft:#5A6B7A;
+    --line:#E6DFCB;
+
+    --display: "Caprasimo", "Cooper Black", Georgia, serif;
+    --sans: "DM Sans", -apple-system, "Segoe UI", system-ui, sans-serif;
+    --mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0; background:#1a1a1a;}
+  body{ font-family: var(--sans); }
+
+  .canvas-row{
+    display:flex; gap: 40px; padding: 40px;
+    align-items: flex-start;
+  }
+  .frame{
+    width: 1920px; height: 1080px;
+    border-radius: 18px; overflow: hidden; position: relative;
+    box-shadow: 0 30px 80px -20px rgba(0,0,0,.6);
+    flex-shrink: 0;
+  }
+  .frame-tag{
+    font-family: var(--mono); font-size: 16px; letter-spacing: .14em; text-transform: uppercase;
+    color: #E6DFCB; padding: 4px 12px; border-radius: 999px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
+    display:inline-flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+  }
+  .frame-tag .pip{ width:8px; height:8px; border-radius:50%; background: var(--duck); }
+
+  /* ---------- Layout grid inside each TV frame ----------
+     1080 = 110 (top bar)  +  570 (media zone)  +  40 (teaser)  +  360 (pond) */
+  .tv{
+    width: 100%; height: 100%; position: relative;
+    display: grid;
+    grid-template-rows: 110px 570px 40px 360px;
+  }
+  /* ---------- TOP BAR ---------- */
+  .topbar{
+    display:flex; align-items: center; justify-content: space-between;
+    padding: 28px 56px 0;
+  }
+  .brand{
+    font-family: var(--display); font-size: 56px; line-height: 1;
+  }
+  .brand em{ font-style: normal; }
+  .brand .sub{
+    font-family: var(--mono); font-size: 16px; letter-spacing: .12em;
+    text-transform: uppercase; display:block; margin-top: 6px;
+  }
+  .pill-big{
+    font-family: var(--display); font-size: 56px;
+    padding: 18px 32px; border-radius: 999px;
+    display:inline-flex; align-items:center; gap:18px;
+    line-height: 1;
+  }
+  .pill-big .of{ opacity:.55; font-size: 40px; }
+
+  /* ---------- MEDIA ZONE ---------- */
+  .media-wrap{
+    display:flex; align-items: stretch; justify-content: space-between;
+    padding: 16px 56px 0;
+    gap: 40px;
+  }
+  .media{
+    width: 920px; height: 540px;
+    border-radius: 28px; overflow: hidden; position: relative;
+    background: #C8CCD0;
+    box-shadow: 0 24px 50px -16px rgba(14,79,107,.35);
+    display:flex; align-items: center; justify-content: center;
+  }
+  .media .ph-icon{
+    width: 80px; height: 80px; border-radius: 50%;
+    background: rgba(255,255,255,.55);
+    display: flex; align-items: center; justify-content: center;
+    color: #6B7480;
+  }
+  .media .timestamp{
+    position:absolute; top: 22px; left: 22px; z-index: 2;
+    background: rgba(0,0,0,.45); color: white;
+    backdrop-filter: blur(8px);
+    font-family: var(--mono); font-size: 18px; letter-spacing: .04em;
+    padding: 10px 16px; border-radius: 999px;
+  }
+  .media .duration{
+    position:absolute; top: 22px; right: 22px; z-index: 2;
+    background: rgba(0,0,0,.45); color: white;
+    backdrop-filter: blur(8px);
+    font-family: var(--mono); font-size: 18px;
+    padding: 10px 16px; border-radius: 999px;
+    display:flex; align-items:center; gap: 8px;
+  }
+  /* Attribution sits beside the media in the same band */
+  .attribution{
+    flex: 1; min-width: 0;
+    display: flex; flex-direction: column; justify-content: center;
+    padding-top: 0;
+  }
+  .attribution .who{
+    font-family: var(--display); font-size: 80px; line-height: 1.02;
+    text-wrap: balance;
+  }
+  .attribution .meta{
+    font-family: var(--mono); font-size: 24px; letter-spacing: .08em;
+    margin-top: 18px; text-transform: uppercase;
+  }
+  .attribution .post-num{
+    margin-top: 28px;
+    font-family: var(--mono); font-size: 22px; letter-spacing: .12em; text-transform: uppercase;
+    opacity: .7;
+  }
+
+  /* ---------- TEASER BAND ---------- */
+  .teaser{
+    display:flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 24px; letter-spacing: .04em;
+    height: 40px;
+    padding: 0 56px;
+  }
+
+  /* ---------- POND ---------- */
+  .pond-region{
+    position: relative;
+    overflow: hidden;
+    height: 360px;
+  }
+  .pond-bg{
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(circle at 25% 30%, rgba(255,255,255,.55) 0 4px, transparent 6px),
+      radial-gradient(circle at 70% 60%, rgba(255,255,255,.45) 0 6px, transparent 8px),
+      radial-gradient(circle at 45% 80%, rgba(255,255,255,.4) 0 4px, transparent 6px),
+      radial-gradient(circle at 88% 22%, rgba(255,255,255,.35) 0 4px, transparent 6px),
+      radial-gradient(ellipse at 50% 50%, transparent 0 35%, rgba(255,255,255,.05) 50%, transparent 70%),
+      linear-gradient(180deg, var(--pond-light) 0%, var(--pond-mid) 100%);
+  }
+  .pond-bg.night{
+    background-image:
+      radial-gradient(circle at 25% 30%, rgba(255,255,255,.18) 0 3px, transparent 5px),
+      radial-gradient(circle at 70% 60%, rgba(255,255,255,.14) 0 5px, transparent 7px),
+      radial-gradient(circle at 45% 80%, rgba(255,255,255,.12) 0 3px, transparent 5px),
+      radial-gradient(circle at 88% 22%, rgba(255,255,255,.1) 0 3px, transparent 5px),
+      radial-gradient(ellipse at 50% 50%, transparent 0 35%, rgba(255,255,255,.04) 50%, transparent 70%),
+      linear-gradient(180deg, #1B6685 0%, #062E40 100%);
+  }
+  /* moonlight wash on the pond at night */
+  .pond-bg.night::after{
+    content:""; position:absolute; inset:0;
+    background: radial-gradient(ellipse 800px 300px at 50% 0%, rgba(232,199,122,.15), transparent 60%);
+    pointer-events: none;
+  }
+  .lily{
+    position: absolute; width: 36px; height: 16px; border-radius: 50%;
+    background: #4FA86B; opacity: .65;
+  }
+  .lily.big{ width: 54px; height: 22px; }
+  .lily.night{ background: #2F6E48; opacity: .85; }
+
+  .pond-duck{ position: absolute; pointer-events: none; transform: translate(-50%, -50%); }
+  .pond-duck svg{ display:block; }
+
+  /* night-mode duck rim light: faint white halo so blue/white ducks stay visible */
+  .frame.night .pond-duck svg{
+    filter: drop-shadow(0 0 8px rgba(255,255,255,.18)) drop-shadow(0 2px 4px rgba(0,0,0,.4));
+  }
+  .frame.night .pond-duck.couple svg{
+    filter: drop-shadow(0 0 16px rgba(232,199,122,.45)) drop-shadow(0 4px 6px rgba(0,0,0,.5));
+  }
+  .frame.day .pond-duck.couple svg{
+    filter: drop-shadow(0 8px 14px rgba(14,79,107,.25));
+  }
+
+  /* ---------- DAY THEME ---------- */
+  .frame.day{ background: var(--cream); color: var(--ink); }
+  .frame.day .brand{ color: var(--pond-deep); }
+  .frame.day .brand em{ color: var(--duck-deep); }
+  .frame.day .brand .sub{ color: var(--ink-soft); }
+  .frame.day .pill-big{ background: var(--pond-deep); color: white; }
+  .frame.day .attribution .who{ color: var(--pond-deep); }
+  .frame.day .attribution .meta{ color: var(--ink-soft); }
+  .frame.day .attribution .post-num{ color: var(--ink-soft); }
+  .frame.day .teaser{ color: var(--ink-soft); }
+  .frame.day .pond-region{ box-shadow: inset 0 1px 0 rgba(14,79,107,.08); }
+
+  /* ---------- NIGHT THEME ---------- */
+  .frame.night{
+    background: var(--pond-deep);
+    color: white;
+    background-image:
+      radial-gradient(900px 500px at 8% 12%, rgba(255,201,60,.06), transparent 60%),
+      radial-gradient(800px 500px at 92% 88%, rgba(232,199,122,.07), transparent 60%);
+  }
+  .frame.night .brand{ color: white; }
+  .frame.night .brand em{ color: var(--duck); }
+  .frame.night .brand .sub{ color: #BFD6E0; }
+  .frame.night .pill-big{
+    background: rgba(255,255,255,.08); color: white;
+    border: 1.5px solid rgba(255,255,255,.18);
+  }
+  .frame.night .pill-big .accent{ color: var(--duck); }
+  .frame.night .attribution .who{ color: white; }
+  .frame.night .attribution .who em{ color: var(--champagne); font-style: normal; }
+  .frame.night .attribution .meta{ color: #BFD6E0; }
+  .frame.night .attribution .post-num{ color: #BFD6E0; }
+  .frame.night .teaser{ color: #BFD6E0; }
+  .frame.night .media{ background: #2A3A45; }
+  .frame.night .media .ph-icon{ background: rgba(255,255,255,.12); color: #BFD6E0; }
+</style>
+</head>
+<body>
+
+<!-- duck symbol library (lifted from design system v0.2) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="duck-glyph" viewBox="0 0 64 50">
+      <ellipse cx="32" cy="44" rx="26" ry="3.5" fill="#1F2933" opacity=".12"/>
+      <ellipse cx="30" cy="32" rx="24" ry="11" fill="var(--body, #FFC93C)"/>
+      <ellipse cx="26" cy="35" rx="16" ry="5" fill="var(--belly, #FFE08A)" opacity=".7"/>
+      <path d="M52 28 Q60 24 58 32 Q54 32 52 30 Z" fill="var(--shade, #F2B400)"/>
+      <circle cx="46" cy="20" r="11" fill="var(--body, #FFC93C)"/>
+      <path d="M55 19 L62 22 L55 25 Z" fill="#F2B400"/>
+      <path d="M55 21 L60 22.5 L55 24 Z" fill="#C9881A" opacity=".5"/>
+      <circle cx="49" cy="17" r="2.2" fill="#1F2933"/>
+      <circle cx="49.7" cy="16.4" r=".7" fill="#FAF3E3"/>
+      <path d="M28 26 Q34 22 40 28 Q36 32 28 30 Z" fill="var(--shade, #F2B400)"/>
+    </symbol>
+    <symbol id="crown" viewBox="0 0 18 12">
+      <path d="M0 6 L3 0 L6 6 L9 0 L12 6 L15 0 L18 6 L18 10 L0 10 Z" fill="#E8C77A" stroke="#C9A347" stroke-width="0.5" stroke-linejoin="round"/>
+      <circle cx="3" cy="0.5" r="1.2" fill="#C9A347"/>
+      <circle cx="9" cy="0.5" r="1.2" fill="#C9A347"/>
+      <circle cx="15" cy="0.5" r="1.2" fill="#C9A347"/>
+    </symbol>
+    <linearGradient id="rainbow-grad" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="#E07A5F"/>
+      <stop offset="25%" stop-color="#FFC93C"/>
+      <stop offset="50%" stop-color="#7DC97D"/>
+      <stop offset="75%" stop-color="#7AB8D9"/>
+      <stop offset="100%" stop-color="#B58AC9"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="canvas-row">
+
+  <!-- ============== DAY / EARLY EVENING ============== -->
+  <div>
+    <div class="frame-tag"><span class="pip"></span> Diaporama TV · Jour / Début de soirée · 20:00</div>
+    <div class="frame day">
+      <div class="tv">
+
+        <!-- TOP BAR -->
+        <div class="topbar">
+          <div class="brand">The <em>Pond</em>.<span class="sub">Le mariage de Marie &amp; Thomas</span></div>
+          <div class="pill-big"><span>42</span><span class="of">/ 52</span> canards</div>
+        </div>
+
+        <!-- MEDIA + ATTRIBUTION -->
+        <div class="media-wrap">
+          <div class="media">
+            <div class="timestamp">📷 Posté il y a 2 min</div>
+            <div class="ph-icon" aria-hidden="true">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </div>
+          </div>
+          <div class="attribution">
+            <div class="who">Léa, la cousine de Marie</div>
+            <div class="meta">il y a 2 minutes</div>
+            <div class="post-num">— Plongée n°42</div>
+          </div>
+        </div>
+
+        <!-- TEASER BAND -->
+        <div class="teaser">🌙 7 canards se débloqueront demain à midi</div>
+
+        <!-- POND -->
+        <div class="pond-region">
+          <div class="pond-bg" id="pond-day-bg"></div>
+          <div id="pond-day"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== NIGHT ============== -->
+  <div>
+    <div class="frame-tag"><span class="pip"></span> Diaporama TV · Nuit · après 23:00</div>
+    <div class="frame night">
+      <div class="tv">
+
+        <!-- TOP BAR -->
+        <div class="topbar">
+          <div class="brand">The <em>Pond</em>.<span class="sub">Le mariage de Marie &amp; Thomas · 02:14</span></div>
+          <div class="pill-big"><span class="accent">48</span><span class="of">/ 52</span> canards</div>
+        </div>
+
+        <!-- MEDIA + ATTRIBUTION -->
+        <div class="media-wrap">
+          <div class="media">
+            <div class="timestamp">🎬 Posté il y a 4 min</div>
+            <div class="duration">0:09 / 0:15</div>
+            <div class="ph-icon" aria-hidden="true">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="6 4 20 12 6 20 6 4"/>
+              </svg>
+            </div>
+          </div>
+          <div class="attribution">
+            <div class="who">Marc, le témoin du <em>marié</em></div>
+            <div class="meta">il y a 4 minutes</div>
+            <div class="post-num">— Plongée n°87</div>
+          </div>
+        </div>
+
+        <!-- TEASER BAND -->
+        <div class="teaser">🌙 4 canards se débloqueront avec le café à 11 h</div>
+
+        <!-- POND -->
+        <div class="pond-region">
+          <div class="pond-bg night" id="pond-night-bg"></div>
+          <div id="pond-night"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ---------- VARIANTS ----------
+  // v0.2 ratio: 80% yellow, 15% white, 4% blue, 1% rainbow
+  const YELLOW = {body:'#FFC93C', belly:'#FFE08A', shade:'#F2B400'};
+  const WHITE  = {body:'#FAF3E3', belly:'#FFFFFF', shade:'#D9D2BE'};
+  const BLUE   = {body:'#7AB8D9', belly:'#A9D8E5', shade:'#4E91B5'};
+
+  function pickVariant() {
+    const r = Math.random();
+    if (r < 0.80) return YELLOW;
+    if (r < 0.95) return WHITE;
+    if (r < 0.99) return BLUE;
+    return 'rainbow';
+  }
+
+  function renderDuck(v, w) {
+    const h = Math.round(w * 50/64);
+    let style;
+    if (v === 'rainbow') {
+      style = '--body:url(#rainbow-grad); --belly:rgba(255,255,255,.55); --shade:#9F70B5;';
+    } else {
+      style = `--body:${v.body}; --belly:${v.belly}; --shade:${v.shade};`;
+    }
+    return `<svg width="${w}" height="${h}" viewBox="0 0 64 50" style="${style}"><use href="#duck-glyph"/></svg>`;
+  }
+
+  function renderCrownedDuck(kind, w) {
+    // Couple ducks: yellow + white. Crown sits above the head.
+    const h = Math.round(w * 60/64);
+    const v = kind === 'white' ? WHITE : YELLOW;
+    const style = `--body:${v.body}; --belly:${v.belly}; --shade:${v.shade};`;
+    // Duck head: circle at (46, 20) r=11 inside duck-glyph, then translated by (0,10) → head crown at y≈19.
+    // Crown is 10 tall; bottom edge must sit at y≈21 (2px below head top) so it bites into the skull.
+    // → translate y = 21 - 10 = 11. Horizontal: head center is x=46, crown is 18 wide → x = 46 - 9 = 37,
+    // tilted slightly left so it reads as worn, not centered like a hat.
+    return `<svg width="${w}" height="${h}" viewBox="0 0 64 60" style="${style}">
+      <use href="#duck-glyph" transform="translate(0,10)"/>
+      <g transform="translate(36,11) rotate(-6 9 5)"><use href="#crown" width="18" height="10"/></g>
+    </svg>`;
+  }
+
+  function placeDuck(host, leftPx, topPx, html, z=2, isCouple=false) {
+    const el = document.createElement('div');
+    el.className = 'pond-duck' + (isCouple ? ' couple' : '');
+    el.style.left = leftPx + 'px';
+    el.style.top  = topPx + 'px';
+    el.style.zIndex = z;
+    el.innerHTML = html;
+    host.appendChild(el);
+  }
+
+  // POND DIMENSIONS in CSS pixels (matches the .pond-region size of each TV)
+  const POND_W = 1920;
+  const POND_H = 360;
+
+  // Build a jittered grid of guest-duck candidate positions, 8 cols × 4 rows.
+  // Reserve the central 2×2 cells for the couple.
+  function generateGuestPositions() {
+    const cols = 8, rows = 4;
+    const cellW = POND_W / cols;
+    const cellH = POND_H / rows;
+    const positions = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        // Reserve the 2×2 center (cols 3-4, rows 1-2)
+        if ((r === 1 || r === 2) && (c === 3 || c === 4)) continue;
+        // 30% positional jitter inside cell
+        const jitterX = (Math.random() - 0.5) * 0.6 * cellW;
+        const jitterY = (Math.random() - 0.5) * 0.6 * cellH;
+        const x = c * cellW + cellW / 2 + jitterX;
+        const y = r * cellH + cellH / 2 + jitterY;
+        positions.push({x, y, row: r});
+      }
+    }
+    // Shuffle so the rendering order isn't grid-aligned
+    for (let i = positions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [positions[i], positions[j]] = [positions[j], positions[i]];
+    }
+    return positions;
+  }
+
+  function placeLilies(host, isNight) {
+    const cls = isNight ? 'lily night' : 'lily';
+    const lilies = [
+      {l: 80, t: 50, big:false},
+      {l: 320, t: 290, big:true},
+      {l: 1680, t: 80, big:false},
+      {l: 1480, t: 310, big:true},
+      {l: 600, t: 28, big:false},
+      {l: 1200, t: 32, big:false},
+      {l: 1820, t: 240, big:true},
+      {l: 60, t: 240, big:false},
+    ];
+    lilies.forEach(({l,t,big}) => {
+      const el = document.createElement('div');
+      el.className = cls + (big ? ' big' : '');
+      el.style.left = l + 'px';
+      el.style.top  = t + 'px';
+      host.appendChild(el);
+    });
+  }
+
+  function placeCouple(host) {
+    // Center of pond: 960, 180. Two 180px-tall ducks side by side, slightly overlapping.
+    // 180 tall → svg width = 180 * 64/60 = 192. We place by their centers.
+    // Slight overlap: centers 90px apart horizontally, sharing y-axis.
+    placeDuck(host, 960 - 65, 180, renderCrownedDuck('yellow', 192), 20, true);
+    placeDuck(host, 960 + 65, 180, renderCrownedDuck('white',  192), 21, true);
+  }
+
+  function fillPond(host, count) {
+    placeLilies(host, host.id.includes('night'));
+    const positions = generateGuestPositions();
+    const N = Math.min(count, positions.length);
+    for (let i = 0; i < N; i++) {
+      const {x, y, row} = positions[i];
+      const v = pickVariant();
+      // Guest ducks ~60px tall = 77px wide. Slight size variation 70-86 px width.
+      const w = 70 + Math.round(Math.random() * 16);
+      // z-order: ducks lower in the pond (closer) on top
+      const z = 2 + row;
+      placeDuck(host, x, y, renderDuck(v, w), z);
+    }
+    placeCouple(host);
+  }
+
+  // ---- DAY POND : 46 guests + 2 couple = 48 ducks total ----
+  fillPond(document.getElementById('pond-day'), 40);   // 40 + 2 = 42 (day count is 42/52)
+  // ---- NIGHT POND : 46 guests + 2 couple = 48 ----
+  fillPond(document.getElementById('pond-night'), 46);
+</script>
+
+</body>
+</html>
