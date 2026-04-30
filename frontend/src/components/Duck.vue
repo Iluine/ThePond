@@ -35,12 +35,16 @@ const props = withDefaults(
     size?: number
     crowned?: boolean
     glow?: boolean
+    /** Variante "endormi" : tête abaissée, œil fermé en courbe.
+     *  Utilisée par GalleryView pour les états mare-endormie/nocturne. */
+    asleep?: boolean
   }>(),
   {
     color: 'yellow',
     size: 56,
     crowned: false,
     glow: false,
+    asleep: false,
   },
 )
 
@@ -107,7 +111,7 @@ const computedStyle = computed(() => ({
     :viewBox="viewBox"
     :style="computedStyle"
     role="img"
-    :aria-label="`canard ${color}${crowned ? ' couronné' : ''}`"
+    :aria-label="`canard ${color}${crowned ? ' couronné' : ''}${asleep ? ' endormi' : ''}`"
   >
     <defs v-if="color === 'rainbow'">
       <linearGradient :id="rainbowId" x1="0" x2="1" y1="0" y2="0">
@@ -130,14 +134,25 @@ const computedStyle = computed(() => ({
       <ellipse cx="26" cy="35" rx="16" ry="5" fill="var(--belly)" opacity=".7" />
       <!-- queue -->
       <path d="M52 28 Q60 24 58 32 Q54 32 52 30 Z" fill="var(--shade)" />
-      <!-- tête -->
-      <circle cx="46" cy="20" r="11" fill="var(--body)" />
-      <!-- bec (toujours jaune duck-deep, signature visuelle) -->
-      <path d="M55 19 L62 22 L55 25 Z" fill="#F2B400" />
-      <path d="M55 21 L60 22.5 L55 24 Z" fill="#C9881A" opacity=".5" />
-      <!-- œil -->
-      <circle cx="49" cy="17" r="2.2" fill="#1F2933" />
-      <circle cx="49.7" cy="16.4" r=".7" fill="#FAF3E3" />
+
+      <!-- Tête : éveillé (cy=20 r=11) ou endormi (cy=22 r=10) -->
+      <template v-if="asleep">
+        <circle cx="46" cy="22" r="10" fill="var(--body)" />
+        <!-- Bec endormi : décalé vers le bas et plus large -->
+        <path d="M55 21 L62 23.5 L55 26 Z" fill="#F2B400" />
+        <!-- Œil fermé : courbe -->
+        <path d="M44 19 Q47 17 50 19" stroke="#1F2933" stroke-width="1.4" fill="none" stroke-linecap="round" />
+      </template>
+      <template v-else>
+        <circle cx="46" cy="20" r="11" fill="var(--body)" />
+        <!-- Bec (toujours jaune duck-deep, signature visuelle) -->
+        <path d="M55 19 L62 22 L55 25 Z" fill="#F2B400" />
+        <path d="M55 21 L60 22.5 L55 24 Z" fill="#C9881A" opacity=".5" />
+        <!-- Œil ouvert -->
+        <circle cx="49" cy="17" r="2.2" fill="#1F2933" />
+        <circle cx="49.7" cy="16.4" r=".7" fill="#FAF3E3" />
+      </template>
+
       <!-- aile -->
       <path d="M28 26 Q34 22 40 28 Q36 32 28 30 Z" fill="var(--shade)" />
     </g>

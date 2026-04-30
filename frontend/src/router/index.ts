@@ -47,12 +47,8 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/gallery',
     name: 'gallery',
-    component: StubView,
-    meta: {
-      title: 'La mare',
-      screen: 'GalleryView',
-      implementedAt: 10,
-    },
+    component: () => import('../views/GalleryView.vue'),
+    meta: { title: 'La mare' },
   },
   {
     path: '/clip/:id',

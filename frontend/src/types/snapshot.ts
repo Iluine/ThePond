@@ -22,17 +22,33 @@ export type Phase = {
   is_final_reveal: boolean
 }
 
-/** Un média photo dans le snapshot. */
+/** Type discriminator pour Media. */
+export type MediaKind = 'photo' | 'clip' | 'voice'
+
+/**
+ * Un média polymorphe dans le snapshot. Le champ `kind` discrimine le
+ * type. Les champs optionnels sont peuplés selon le kind :
+ *   - photo : pas de duration / waveform / caption
+ *   - clip  : duration_seconds
+ *   - voice : duration_seconds + waveform_json + caption?
+ *
+ * `user_pseudo` et `user_color` sont joints côté backend pour éviter
+ * un round-trip par carte de la galerie.
+ */
 export type Media = {
   id: string
+  kind: MediaKind
   user_id: string
   filename: string
+  /** Vide pour les vocaux (pas de thumbnail concept). */
   thumb_filename: string
   posted_at: string
   hidden: boolean
-  /** Enrichissements pour l'UI — joints côté backend pour éviter un round-trip */
-  user_pseudo?: string
-  user_color?: DuckColor
+  duration_seconds?: number | null
+  waveform_json?: string | null
+  caption?: string | null
+  user_pseudo?: string | null
+  user_color?: DuckColor | null
 }
 
 export type SnapshotCounts = {
