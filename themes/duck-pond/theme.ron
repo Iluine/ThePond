@@ -1,0 +1,7 @@
+// The Pond — duck-pond theme (default)
+// Renommer/dupliquer ce dossier pour thématiser un autre événement.
+(
+    event_name: "Le mariage de Marie & Thomas",
+    expected_guests_count: 52,
+    witness_secret_env_var: "WITNESS_SECRET",
+)

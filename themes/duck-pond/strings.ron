@@ -1,0 +1,47 @@
+// Toutes les microcopies de l'app. Ne pas reformuler librement :
+// le vocabulaire est figé dans PROJECT.md (la mare, barboter, cancaner, coin-coin, plonger).
+//
+// Les placeholders {nom_palier_X}, {heure}, {pseudo}, {N} sont remplacés à l'exécution.
+(
+    // ─── Salutations ────────────────────────────────────────────
+    greeting_day:    "Bonsoir {pseudo}",                              // avant 23h
+    greeting_night:  "Tes plumes scintillent magnifiquement, {pseudo}", // après 23h
+
+    // ─── Confirmation post-upload ──────────────────────────────
+    confirm_splash:  "Splash !",
+    confirm_photo:   "Ta photo a rejoint la mare",
+    confirm_clip:    "Ton clip a rejoint la mare",
+    confirm_voice:   "Ton coin-coin a rejoint la mare",
+
+    // ─── CTA continuer après upload ────────────────────────────
+    cta_continue_photo: "CONTINUER À BARBOTER",
+    cta_continue_clip:  "CONTINUER À CANCANER",
+    cta_continue_voice: "CONTINUER À COIN-COIN",
+
+    // ─── Liens ─────────────────────────────────────────────────
+    link_gallery:    "Voir ce qui se passe dans la mare →",
+    link_mare_tv:    "Voir Mare TV →",
+
+    // ─── Install PWA ───────────────────────────────────────────
+    install_caption: "Pour ne pas perdre la mare ce soir",
+
+    // ─── États de la galerie ───────────────────────────────────
+    gallery_state_1_sleepy:     "Les premiers barbotages se révèleront avec {nom_palier_2} vers {heure}",
+    gallery_state_2_arrived:    "{nom_palier_précédent} vient d'arriver · {N} souvenirs",
+    gallery_state_2_announce:   "Les souvenirs de {palier_en_cours} se révèleront avec {palier_suivant} vers {heure}",
+    gallery_state_3_nocturnal:  "Plus assez de lumière aujourd'hui · on y verra mieux demain pour les autres barbotages",
+    gallery_state_4_revealed:   "Les canards sont confits · dégustons maintenant…",
+
+    // ─── Verbes du projet ──────────────────────────────────────
+    verb_photo:      "barboter",      // barboter une photo
+    verb_clip:       "cancaner",      // cancaner un clip
+    verb_voice:      "coin-coin",     // faire coin-coin
+    verb_enter:      "plonger",       // plonger dans la mare
+
+    // ─── Noms collectifs ───────────────────────────────────────
+    content_collective: "les barbotages",
+    user_collective:    "les canards",
+    place_name:         "la mare",
+    tv_name:            "Mare TV",
+    brand:              "The Pond.",
+)

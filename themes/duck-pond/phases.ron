@@ -1,0 +1,11 @@
+// Paliers par défaut pour duck-pond.
+// Format: (name, target_time_24h, is_final_reveal)
+// Les témoins peuvent renommer / réordonner / ajouter / supprimer
+// depuis la page d'orchestration au moment de l'événement.
+[
+    (name: "Apéro",                  target_time: "19:00", is_final_reveal: false),
+    (name: "Dîner",                  target_time: "20:30", is_final_reveal: false),
+    (name: "Dessert",                target_time: "22:30", is_final_reveal: false),
+    (name: "Café",                   target_time: "00:00", is_final_reveal: false),
+    (name: "Le réveil de la mare",   target_time: "11:00+1", is_final_reveal: true),
+]

@@ -1,0 +1,44 @@
+// Générateur de pseudos pour duck-pond.
+// Format final : "Canard" + adverbe en -ment + adjectif/participe-passé.
+// Exemples : CanardÉlégammentPerché, CanardJoyeusementDansant, CanardCurieusementRêveur.
+//
+// Listes initiales reprises du HTML Welcome v2 (à enrichir librement).
+(
+    prefix: "Canard",
+
+    adverbs: [
+        "Élégamment",
+        "Discrètement",
+        "Joyeusement",
+        "Subtilement",
+        "Audacieusement",
+        "Doucement",
+        "Curieusement",
+        "Triomphalement",
+        "Calmement",
+        "Facétieusement",
+        "Fièrement",
+        "Tendrement",
+        "Lentement",
+        "Délicatement",
+        "Brillamment",
+    ],
+
+    adjectives: [
+        "Perché",
+        "Plongé",
+        "Flottant",
+        "Échappé",
+        "Câliné",
+        "Endormi",
+        "Bavard",
+        "Rêveur",
+        "Rieur",
+        "Migrant",
+        "Dansant",
+        "Couronné",
+        "Voyageur",
+        "Étoilé",
+        "Serein",
+    ],
+)
