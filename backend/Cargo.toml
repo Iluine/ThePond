@@ -1,0 +1,48 @@
+[package]
+name = "thepond"
+version = "0.1.0"
+edition = "2021"
+license = "Beerware"
+description = "The Pond — PWA backend for a self-hosted wedding photo/clip/voice pond"
+publish = false
+
+[[bin]]
+name = "thepond"
+path = "src/main.rs"
+
+[dependencies]
+# HTTP / async runtime
+axum = "0.7"
+tokio = { version = "1", features = ["full"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["trace", "cors"] }
+
+# Database
+sqlx = { version = "0.8", features = [
+    "runtime-tokio-rustls",
+    "sqlite",
+    "macros",
+    "chrono",
+    "uuid",
+    "migrate",
+] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ron = "0.8"
+
+# Errors / logging
+thiserror = "1"
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Misc
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
