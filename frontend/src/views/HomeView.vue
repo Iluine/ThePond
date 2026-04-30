@@ -9,6 +9,51 @@ import PondCounter from '../components/PondCounter.vue'
 import MareTVPill from '../components/MareTVPill.vue'
 import Duck from '../components/Duck.vue'
 import Pond, { type PondDuck } from '../components/Pond.vue'
+import { useUserStore, type Canard } from '../stores/user'
+import { useSnapshotStore } from '../stores/snapshot'
+import { useUploadQueueStore } from '../stores/uploadQueue'
+import { useRouter } from 'vue-router'
+
+// ─── Stores (demo) ──────────────────────────────────────────────
+const userStore = useUserStore()
+const snapshotStore = useSnapshotStore()
+const uploadQueue = useUploadQueueStore()
+const router = useRouter()
+
+const stubRoutes = router
+  .getRoutes()
+  .filter((r) => r.meta?.implementedAt !== undefined)
+  .sort(
+    (a, b) =>
+      (a.meta.implementedAt as number) - (b.meta.implementedAt as number),
+  )
+
+/** Mock register sans appeler le backend (l'endpoint POST /api/users
+ *  n'arrive qu'au prompt 6). On simule juste un Canard local pour
+ *  valider que userStore.user devient réactif. */
+function mockRegister() {
+  const fakeCanard: Canard = {
+    id: crypto.randomUUID(),
+    pseudo: 'CanardÉlégammentPerché',
+    duck_color: 'yellow',
+    created_at: new Date().toISOString(),
+  }
+  // On bypass register() (qui ferait un POST), on écrit directement
+  // dans le state pour la démo.
+  userStore.$patch({ user: fakeCanard })
+  try {
+    localStorage.setItem('thepond.user.v1', JSON.stringify(fakeCanard))
+  } catch {
+    /* noop */
+  }
+}
+
+function mockEnqueue() {
+  // Crée un faux File pour démontrer la queue
+  const blob = new Blob(['fake'], { type: 'image/jpeg' })
+  const file = new File([blob], `photo-${Date.now()}.jpg`, { type: 'image/jpeg' })
+  uploadQueue.enqueue(file, 'photo')
+}
 
 // ─── Helpers pour la démo Pond ──────────────────────────────────
 function makeFakeDucks(n: number): PondDuck[] {
@@ -36,6 +81,105 @@ const largeDucks = makeFakeDucks(30)
         Design system v0.2 · Showcase
       </p>
     </header>
+
+    <!-- ─── Routes & Stores (debug) ─────────────────────────────── -->
+    <section class="space-y-4">
+      <h2 class="font-display text-2xl text-pond-deep">Routes & Stores</h2>
+
+      <!-- Liste des routes (cliquables) -->
+      <div class="p-5 bg-cream-deep rounded-2xl border border-cream-line space-y-3">
+        <div class="font-mono text-[10px] uppercase tracking-wider text-ink-soft">
+          {{ stubRoutes.length }} routes stubbées · cliquer pour vérifier
+        </div>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm">
+          <li v-for="r in stubRoutes" :key="r.name?.toString()">
+            <RouterLink
+              :to="r.path.replace(':id', 'demo').replace(':pathMatch(.*)*', '404-test')"
+              class="font-mono text-pond-mid hover:text-pond-deep underline underline-offset-2"
+            >
+              {{ r.path }}
+            </RouterLink>
+            <span class="text-ink-soft text-xs">
+              · {{ r.meta.screen }} · prompt {{ r.meta.implementedAt }}
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- État des 3 stores -->
+      <div class="p-5 bg-cream-deep rounded-2xl border border-cream-line space-y-3">
+        <div class="font-mono text-[10px] uppercase tracking-wider text-ink-soft">
+          État des stores · les actions ci-dessous écrivent sans backend
+        </div>
+
+        <!-- userStore -->
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <div class="font-mono text-xs">
+            <span class="text-ink-soft">user</span> ·
+            <span :class="userStore.isAuthenticated ? 'text-green' : 'text-coral-deep'">
+              {{ userStore.isAuthenticated ? userStore.displayName : 'null' }}
+            </span>
+          </div>
+          <div class="flex gap-2">
+            <button
+              type="button"
+              class="font-mono text-[10px] uppercase px-2 py-1 rounded-pill border border-cream-line bg-cream"
+              @click="mockRegister"
+            >
+              mock register
+            </button>
+            <button
+              type="button"
+              class="font-mono text-[10px] uppercase px-2 py-1 rounded-pill border border-coral-line bg-coral-soft text-coral-deep"
+              @click="userStore.clear()"
+            >
+              clear
+            </button>
+          </div>
+        </div>
+
+        <!-- snapshotStore -->
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <div class="font-mono text-xs">
+            <span class="text-ink-soft">snapshot</span> ·
+            <span :class="snapshotStore.connected ? 'text-green' : 'text-coral-deep'">
+              {{ snapshotStore.connected ? 'connected' : 'disconnected' }}
+            </span>
+            ·
+            <span class="text-ink-soft">
+              {{ snapshotStore.snapshot ? 'loaded' : 'null (SSE prompt 5)' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- uploadQueueStore -->
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <div class="font-mono text-xs">
+            <span class="text-ink-soft">queue</span> ·
+            {{ uploadQueue.items.length }} items
+            ({{ uploadQueue.pending.length }} pending,
+            {{ uploadQueue.failed.length }} failed,
+            {{ uploadQueue.lost.length }} lost)
+          </div>
+          <div class="flex gap-2">
+            <button
+              type="button"
+              class="font-mono text-[10px] uppercase px-2 py-1 rounded-pill border border-cream-line bg-cream"
+              @click="mockEnqueue"
+            >
+              mock enqueue
+            </button>
+            <button
+              type="button"
+              class="font-mono text-[10px] uppercase px-2 py-1 rounded-pill border border-coral-line bg-coral-soft text-coral-deep"
+              @click="uploadQueue.clear()"
+            >
+              clear
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- ─── Pond ────────────────────────────────────────────────── -->
     <section class="space-y-4">
@@ -274,7 +418,7 @@ const largeDucks = makeFakeDucks(30)
 
     <footer class="text-center pt-8 pb-4">
       <p class="font-mono text-[10px] uppercase tracking-widest text-ink-soft">
-        Bootstrap · Prompt 3 · Pond.vue (la mare)
+        Bootstrap · Prompt 4 · Routing & stores Pinia
       </p>
     </footer>
   </main>
