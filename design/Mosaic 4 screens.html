@@ -1,0 +1,1042 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>The Pond — Mosaïque · 4 écrans restants</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pond-deep:#0E4F6B; --pond-deeper:#062E40; --pond-mid:#3E8AA8;
+    --pond-light:#A9D8E5; --pond-pale:#E6F3F8;
+    --cream:#FAF3E3; --cream-deep:#F2E8CF; --cream-line:#EADFB8;
+    --duck:#FFC93C; --duck-deep:#F2B400;
+    --champagne:#E8C77A; --champagne-pale:#F6EAC4; --champagne-deep:#C9A347;
+    --coral-soft:#F8D9CF; --coral-deep:#B85A3F; --coral-line:#EDB7A4;
+    --ink:#1F2933; --ink-soft:#5A6B7A;
+    --display:"Caprasimo","Cooper Black",Georgia,serif;
+    --sans:"DM Sans",-apple-system,system-ui,sans-serif;
+    --mono:"DM Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0; background:#181818}
+  body{
+    font-family:var(--sans); color:var(--ink);
+    min-height:100vh;
+    padding:48px 24px;
+    background:
+      radial-gradient(800px 500px at 20% 0%, #232b30 0%, transparent 60%),
+      radial-gradient(700px 500px at 90% 100%, #1f2a31 0%, transparent 60%),
+      #181818;
+  }
+
+  /* ---- canvas / mosaic ---- */
+  .canvas-meta{
+    max-width:1480px; margin:0 auto 28px;
+    color:#cfc7b5;
+  }
+  .canvas-meta h1{
+    font-family:var(--display); font-size:34px; margin:0;
+    color:#FAF3E3;
+  }
+  .canvas-meta p{
+    margin:4px 0 0;
+    font-family:var(--mono); font-size:12px; color:#8a8275; letter-spacing:.04em;
+  }
+
+  .mosaic{
+    max-width:1480px; margin:0 auto;
+    display:grid;
+    grid-template-columns: repeat(4, 320px);
+    gap:36px;
+    justify-content:center;
+  }
+  .col{ display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .col-label{
+    font-family:var(--mono); font-size:11px; letter-spacing:.18em;
+    color:#cfc7b5; text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .col-label .num{ color:#7d7461; margin-right:8px; }
+
+  /* phone shell */
+  .phone{
+    width:320px; min-height:680px;
+    background:var(--cream);
+    border-radius:30px;
+    overflow:hidden;
+    box-shadow:0 24px 60px -16px rgba(0,0,0,.6), 0 0 0 6px #111, 0 0 0 7px #2a2a2a;
+    position:relative;
+    background-image:
+      radial-gradient(380px 280px at 0% 0%, rgba(169,216,229,.45), transparent 60%),
+      radial-gradient(340px 260px at 100% 0%, rgba(255,201,60,.18), transparent 60%);
+  }
+  .phone.dark{
+    background:#0a0a0a;
+    background-image:none;
+  }
+
+  .status-bar{
+    height:38px; padding:12px 20px 0;
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:var(--sans); font-weight:600; font-size:13px; color:var(--ink);
+  }
+  .phone.dark .status-bar{ color:#fff; }
+  .status-bar .icons{display:flex; gap:5px; align-items:center;}
+
+  .home-ind{
+    position:absolute; bottom:0; left:0; right:0; height:14px;
+    display:flex; align-items:center; justify-content:center;
+    pointer-events:none;
+  }
+  .home-ind::after{ content:""; width:100px; height:4px; border-radius:2px; background:rgba(31,41,51,.45); }
+  .phone.dark .home-ind::after{ background:rgba(255,255,255,.6); }
+
+  /* ---- shared chrome ---- */
+  .header-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 18px 4px;
+  }
+  .brand{
+    font-family:var(--sans); font-weight:700; font-size:15px;
+    color:var(--pond-deep);
+  }
+  .brand .y{ color:var(--duck-deep); }
+  .pill{
+    font-family:var(--mono); font-size:11px; font-weight:500;
+    padding:5px 10px; border-radius:999px;
+    background:var(--cream-deep);
+    color:var(--pond-deep);
+    border:1px solid var(--cream-line);
+    letter-spacing:.02em;
+    display:inline-flex; align-items:center; gap:4px;
+    white-space:nowrap;
+  }
+  .pill.shield{
+    background:rgba(62,138,168,.12);
+    border-color:rgba(62,138,168,.45);
+    color:var(--pond-deep);
+  }
+  .pill.shield svg{ color:var(--pond-mid); }
+
+  /* ===========================================================
+     SCREEN 1 — GALERIE
+     =========================================================== */
+  .g-sub{
+    padding:8px 18px 6px;
+  }
+  .g-sub h2{
+    margin:0;
+    font-family:var(--display); font-size:26px; line-height:1; color:var(--pond-deep);
+  }
+  .g-sub p{
+    margin:4px 0 0;
+    font-family:var(--sans); font-size:12px; color:var(--ink-soft);
+  }
+  .reveal-banner{
+    margin:10px 14px 0;
+    padding:10px 12px;
+    display:flex; align-items:center; gap:10px;
+    background:linear-gradient(135deg, var(--champagne-pale) 0%, #fff6dc 100%);
+    border:1px solid var(--champagne);
+    border-radius:14px;
+    font-family:var(--sans); font-size:12px; color:var(--ink);
+    line-height:1.35;
+  }
+  .reveal-banner .moon{
+    width:24px; height:24px; flex-shrink:0;
+    border-radius:50%;
+    background: radial-gradient(circle at 30% 35%, #fff5d0 0 30%, var(--champagne) 32% 100%);
+    box-shadow: inset -3px -3px 4px rgba(201,163,71,.4);
+    position:relative;
+  }
+  .reveal-banner .moon::before{
+    content:""; position:absolute; top:6px; right:5px;
+    width:10px; height:10px; border-radius:50%;
+    background:var(--champagne-pale);
+  }
+  .reveal-banner b{ color:var(--champagne-deep); }
+
+  .filter-row{
+    margin:12px 14px 8px;
+    display:flex; gap:6px;
+    overflow-x:auto;
+    scrollbar-width:none;
+    font-family:var(--mono); font-size:10px; letter-spacing:.04em;
+  }
+  .filter-row::-webkit-scrollbar{ display:none; }
+  .chip{
+    padding:5px 9px; border-radius:999px;
+    background:transparent;
+    color:var(--ink-soft);
+    border:1px solid var(--cream-line);
+    text-transform:uppercase;
+    display:inline-flex; align-items:center; gap:4px;
+    white-space:nowrap;
+  }
+  .chip.active{
+    background:var(--pond-deep);
+    color:#fff;
+    border-color:var(--pond-deep);
+  }
+  .chip svg{ width:10px; height:10px; }
+
+  .grid-mason{
+    margin:0 14px 14px;
+    column-count:2; column-gap:8px;
+  }
+  .card{
+    break-inside:avoid;
+    margin-bottom:8px;
+    border-radius:12px;
+    overflow:hidden;
+    background:var(--cream-deep);
+    border:1px solid var(--cream-line);
+    box-shadow:0 4px 10px -6px rgba(14,79,107,.18);
+    position:relative;
+  }
+  .card.couple{
+    border:2px solid var(--champagne);
+    box-shadow:0 4px 14px -6px rgba(201,163,71,.5);
+  }
+  .card-media{
+    background:#C8CCD0;
+    width:100%;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff;
+    position:relative;
+  }
+  .card-media.h-s{ height:90px; }
+  .card-media.h-m{ height:140px; }
+  .card-media.h-l{ height:170px; }
+  .card-media.video{
+    background: linear-gradient(135deg,#3a4148,#5a6168);
+  }
+  .card-media.video .play-circle{
+    width:30px; height:30px; border-radius:50%;
+    background:rgba(255,255,255,.85);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .card-media .ts{
+    position:absolute; bottom:6px; right:6px;
+    font-family:var(--mono); font-size:9px; color:#fff;
+    background:rgba(0,0,0,.55);
+    padding:2px 5px; border-radius:4px;
+    letter-spacing:.04em;
+  }
+  /* vocal card waveform */
+  .card-vocal{
+    background:linear-gradient(180deg, var(--pond-pale), #d6ecf3);
+    height:160px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:8px;
+    position:relative;
+  }
+  .card-vocal .wf{
+    display:flex; align-items:center; gap:2px; height:48px; padding:0 14px;
+  }
+  .card-vocal .wf span{
+    width:3px; background:var(--pond-mid); border-radius:2px;
+    flex-shrink:0;
+  }
+  .card-vocal .icon-mic{
+    width:24px; height:24px; border-radius:50%;
+    background:var(--pond-deep);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff;
+    position:absolute; top:8px; right:8px;
+  }
+  .card-vocal .ts-vocal{
+    font-family:var(--mono); font-size:10px; color:var(--pond-deep); letter-spacing:.04em;
+  }
+
+  .card-foot{
+    padding:6px 8px;
+    display:flex; align-items:center; gap:6px;
+    background:var(--cream);
+  }
+  .card-foot .av{
+    width:18px; height:18px; flex-shrink:0;
+    border-radius:50%;
+    background:var(--duck);
+    border:1.2px solid var(--pond-deep);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .card-foot .av.white{ background:#EADFB8; }
+  .card-foot .av.blue{ background:#7AB8D9; }
+  .card-foot .meta{
+    font-family:var(--mono); font-size:9px; color:var(--ink-soft);
+    letter-spacing:.02em;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .card-foot .meta b{ color:var(--ink); font-weight:500; }
+
+  /* ===========================================================
+     SCREEN 2 — CLIP (vertical fullscreen)
+     =========================================================== */
+  .clip-stage{
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, #2a2f33 0%, #1a1d20 100%);
+  }
+  .clip-stage::before{
+    /* simulate a frame with dim subject */
+    content:""; position:absolute; inset:0;
+    background:
+      radial-gradient(circle at 50% 45%, rgba(255,201,60,.08) 0%, transparent 40%),
+      radial-gradient(circle at 30% 70%, rgba(62,138,168,.15) 0%, transparent 50%);
+  }
+  .clip-pause{
+    position:absolute; left:50%; top:42%; transform:translate(-50%,-50%);
+    width:56px; height:56px; border-radius:50%;
+    background:rgba(255,255,255,.18);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff;
+    backdrop-filter: blur(6px);
+  }
+  .clip-top{
+    position:absolute; top:0; left:0; right:0;
+    padding:42px 16px 24px;
+    background: linear-gradient(180deg, rgba(0,0,0,.55) 0%, transparent 100%);
+    display:flex; justify-content:space-between; align-items:flex-start;
+    z-index:2;
+  }
+  .clip-top .x{
+    width:34px; height:34px; border-radius:50%;
+    background:rgba(255,255,255,.15);
+    color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    backdrop-filter: blur(6px);
+  }
+  .clip-top .pill{
+    background:rgba(255,255,255,.15);
+    color:#fff;
+    border-color:rgba(255,255,255,.2);
+  }
+
+  .clip-side{
+    position:absolute; right:10px; bottom:140px;
+    display:flex; flex-direction:column; align-items:center; gap:18px;
+    z-index:2;
+  }
+  .clip-side .act{
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    color:#fff;
+  }
+  .clip-side .act-ic{
+    width:38px; height:38px; border-radius:50%;
+    background:rgba(255,255,255,.12);
+    display:flex; align-items:center; justify-content:center;
+    backdrop-filter: blur(6px);
+  }
+  .clip-side .act-ic.liked{ background:rgba(255,80,80,.95); }
+  .clip-side .act .n{
+    font-family:var(--mono); font-size:10px; font-weight:500;
+  }
+  .clip-side .me{
+    width:38px; height:38px; border-radius:50%;
+    background:var(--duck);
+    border:2px solid var(--pond-deep);
+    overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    margin-top:6px;
+    box-shadow:0 4px 10px rgba(0,0,0,.4);
+  }
+
+  .clip-bottom{
+    position:absolute; left:0; right:0; bottom:0;
+    padding:18px 70px 32px 16px;
+    background: linear-gradient(0deg, rgba(0,0,0,.75) 0%, rgba(0,0,0,0) 100%);
+    color:#fff;
+    z-index:2;
+  }
+  .clip-bottom .row{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .clip-bottom .av{
+    width:30px; height:30px; border-radius:50%;
+    background:#EADFB8;
+    border:2px solid var(--pond-deep);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden; flex-shrink:0;
+  }
+  .clip-bottom .who{
+    font-family:var(--sans); font-weight:700; font-size:13px;
+  }
+  .clip-bottom .cap{
+    font-family:var(--sans); font-size:13px; line-height:1.35;
+    margin:0 0 4px;
+  }
+  .clip-bottom .ts{
+    font-family:var(--mono); font-size:10px; color:rgba(255,255,255,.7);
+    letter-spacing:.03em;
+    display:flex; align-items:center; gap:8px;
+  }
+  .clip-bottom .ts .wave-mini{
+    display:flex; align-items:center; gap:1.5px;
+  }
+  .clip-bottom .ts .wave-mini span{
+    width:2px; background:#fff; border-radius:1px;
+    animation: wavebar 1.2s ease-in-out infinite;
+  }
+  @keyframes wavebar{
+    0%,100%{ height:3px } 50%{ height:9px }
+  }
+  .clip-swipe{
+    position:absolute; bottom:140px; left:50%; transform:translateX(-50%);
+    font-family:var(--mono); font-size:9px; color:rgba(255,255,255,.55);
+    letter-spacing:.16em; text-transform:uppercase;
+    white-space:nowrap;
+    z-index:3;
+  }
+
+  /* ===========================================================
+     SCREEN 3 — VOCAL
+     =========================================================== */
+  .v-back{
+    padding:6px 18px 4px;
+    font-family:var(--sans); font-size:13px; color:var(--pond-mid);
+    display:flex; align-items:center; gap:6px;
+  }
+  .v-hero{
+    text-align:center;
+    padding:14px 18px 0;
+  }
+  .v-hero .av{
+    width:104px; height:104px; border-radius:50%;
+    background:#EADFB8;
+    border:3px solid var(--pond-deep);
+    margin:0 auto 12px;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+    position:relative;
+  }
+  .v-hero h2{
+    margin:0;
+    font-family:var(--display); font-size:22px; line-height:1.1;
+    color:var(--pond-deep);
+  }
+  .v-hero .ts-hero{
+    margin-top:4px;
+    font-family:var(--mono); font-size:10px; color:var(--ink-soft);
+    letter-spacing:.06em;
+  }
+  .v-wave{
+    margin:18px 18px 6px;
+    height:72px;
+    display:flex; align-items:center; gap:3px;
+    position:relative;
+  }
+  .v-wave span{
+    flex:1; min-width:4px;
+    background:var(--pond-light); border-radius:2px;
+  }
+  .v-wave span.played{ background:var(--pond-deep); }
+  .v-wave .progress-knob{
+    position:absolute; top:50%; transform:translate(-50%,-50%);
+    width:14px; height:14px; border-radius:50%;
+    background:var(--duck);
+    border:2px solid var(--pond-deep);
+    box-shadow:0 2px 4px rgba(0,0,0,.2);
+  }
+  .v-times{
+    margin:0 18px 14px;
+    display:flex; justify-content:space-between;
+    font-family:var(--mono); font-size:11px; color:var(--ink-soft); letter-spacing:.04em;
+  }
+  .v-times .now{ color:var(--pond-deep); font-weight:500; }
+  .v-play-wrap{ display:flex; justify-content:center; padding:4px 0 14px; }
+  .v-play{
+    width:72px; height:72px; border-radius:50%;
+    background:var(--duck); color:var(--pond-deep);
+    border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 0 var(--duck-deep), 0 14px 24px -8px rgba(242,180,0,.45);
+  }
+  .v-cap{
+    text-align:center;
+    margin:0 24px 12px;
+    font-family:var(--sans); font-size:13px; color:var(--ink-soft); line-height:1.3;
+  }
+  .v-acts{
+    display:flex; justify-content:center; gap:10px; padding:0 18px;
+  }
+  .v-acts .v-pill{
+    padding:8px 14px; border-radius:999px;
+    border:1px solid var(--cream-line);
+    background:var(--cream);
+    font-family:var(--sans); font-size:12px; font-weight:500; color:var(--ink);
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .v-acts .v-pill.heart svg{ color:#E14B3F; }
+  .v-acts .v-pill.reply svg{ color:var(--pond-mid); }
+  .v-nav{
+    position:absolute; bottom:24px; left:0; right:0;
+    display:flex; justify-content:space-between;
+    padding:0 22px;
+    font-family:var(--mono); font-size:10px; color:var(--pond-mid);
+    letter-spacing:.08em; text-transform:uppercase;
+  }
+  .v-nav span{ display:inline-flex; align-items:center; gap:4px; }
+
+  /* ===========================================================
+     SCREEN 4 — MODÉRATION
+     =========================================================== */
+  .m-welcome{
+    padding:10px 18px 4px;
+  }
+  .m-welcome h2{
+    margin:0;
+    font-family:var(--display); font-size:22px; color:var(--pond-deep);
+  }
+  .m-welcome p{
+    margin:2px 0 0;
+    font-family:var(--mono); font-size:10px; color:var(--ink-soft);
+    letter-spacing:.04em; text-transform:uppercase;
+  }
+  .m-stats{
+    margin:12px 14px 0;
+    background:var(--cream-deep);
+    border:1px solid var(--cream-line);
+    border-radius:14px;
+    padding:12px 8px;
+    display:flex; justify-content:space-around;
+  }
+  .m-stat{
+    flex:1; text-align:center;
+    border-right:1px solid var(--cream-line);
+    padding:0 4px;
+  }
+  .m-stat:last-child{ border-right:none; }
+  .m-stat .v{
+    font-family:var(--display); font-size:22px; line-height:1; color:var(--pond-deep);
+  }
+  .m-stat .l{
+    margin-top:4px;
+    font-family:var(--mono); font-size:9px; letter-spacing:.06em;
+    color:var(--ink-soft); text-transform:uppercase;
+  }
+  .m-stat.warn .v{ color:var(--coral-deep); }
+  .m-stat.lock .v{ color:var(--champagne-deep); }
+
+  .m-section-title{
+    margin:14px 18px 6px;
+    font-family:var(--mono); font-size:10px; letter-spacing:.14em;
+    color:var(--pond-deep); text-transform:uppercase;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .m-section-title .count{
+    color:var(--ink-soft);
+    background:var(--cream-deep);
+    border:1px solid var(--cream-line);
+    padding:2px 6px; border-radius:6px; font-size:9px;
+  }
+  .m-empty{
+    margin:0 14px;
+    background:var(--pond-pale);
+    border:1px dashed rgba(62,138,168,.45);
+    border-radius:14px;
+    padding:16px 14px;
+    text-align:center;
+  }
+  .m-empty .duck-mini{
+    margin-bottom:10px; display:flex; justify-content:center;
+  }
+  .m-empty p{
+    margin:0;
+    font-family:var(--sans); font-size:12px; line-height:1.35; color:var(--pond-deep);
+  }
+  .m-empty p .quiet{ color:var(--ink-soft); }
+
+  .m-toggle{
+    margin:0 14px;
+    padding:10px 12px;
+    background:var(--cream);
+    border:1px solid var(--cream-line);
+    border-radius:12px;
+    margin-bottom:6px;
+  }
+  .m-toggle-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .m-toggle-row .lbl{
+    font-family:var(--sans); font-weight:600; font-size:13px; color:var(--ink);
+  }
+  .m-toggle-desc{
+    margin-top:2px;
+    font-family:var(--mono); font-size:10px; color:var(--ink-soft);
+    letter-spacing:.02em;
+    line-height:1.35;
+  }
+  .switch{
+    width:36px; height:20px; flex-shrink:0;
+    border-radius:999px;
+    background:#cfd2d6;
+    position:relative;
+    transition:background .15s;
+  }
+  .switch::after{
+    content:""; position:absolute; top:2px; left:2px;
+    width:16px; height:16px; border-radius:50%;
+    background:#fff;
+    box-shadow:0 1px 3px rgba(0,0,0,.25);
+    transition:left .15s;
+  }
+  .switch.on{ background:var(--pond-deep); }
+  .switch.on::after{ left:18px; }
+
+  .m-rule{
+    margin:14px 18px 8px;
+    border-top:1px solid var(--cream-line);
+  }
+  .m-danger{
+    margin:0 14px 6px;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .m-danger button{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--coral-line);
+    background:var(--coral-soft);
+    color:var(--coral-deep);
+    font-family:var(--sans); font-weight:600; font-size:13px;
+    border-radius:12px;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    cursor:pointer;
+  }
+  .m-danger a{
+    text-align:center;
+    font-family:var(--sans); font-size:12px;
+    color:var(--ink-soft);
+    text-decoration:underline;
+    text-decoration-color:var(--cream-line);
+    text-underline-offset:3px;
+  }
+
+  /* helper: small svg icons */
+  .ico{ display:inline-flex; align-items:center; justify-content:center; }
+</style>
+</head>
+<body>
+
+<!-- duck symbol library -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="duck-glyph" viewBox="0 0 64 50">
+      <ellipse cx="32" cy="44" rx="26" ry="3.5" fill="#1F2933" opacity=".12"/>
+      <ellipse cx="30" cy="32" rx="24" ry="11" fill="var(--body, #FFC93C)"/>
+      <ellipse cx="26" cy="35" rx="16" ry="5" fill="var(--belly, #FFE08A)" opacity=".7"/>
+      <path d="M52 28 Q60 24 58 32 Q54 32 52 30 Z" fill="var(--shade, #F2B400)"/>
+      <circle cx="46" cy="20" r="11" fill="var(--body, #FFC93C)"/>
+      <path d="M55 19 L62 22 L55 25 Z" fill="#F2B400"/>
+      <path d="M55 21 L60 22.5 L55 24 Z" fill="#C9881A" opacity=".5"/>
+      <circle cx="49" cy="17" r="2.2" fill="#1F2933"/>
+      <circle cx="49.7" cy="16.4" r=".7" fill="#FAF3E3"/>
+      <path d="M28 26 Q34 22 40 28 Q36 32 28 30 Z" fill="var(--shade, #F2B400)"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="canvas-meta">
+  <h1>Mosaïque · 4 écrans restants</h1>
+  <p>Brouillon de structure · mobile 320px · à itérer après revue</p>
+</div>
+
+<div class="mosaic">
+
+  <!-- =========================================
+       COLONNE 1 — GALERIE
+       ========================================= -->
+  <div class="col">
+    <div class="col-label"><span class="num">01</span>GALERIE · LA MARE</div>
+    <div class="phone">
+      <div class="status-bar">
+        <span>23:43</span>
+        <div class="icons">
+          <svg width="14" height="9" viewBox="0 0 18 11"><rect x="1" y="6" width="3" height="4" rx=".5" fill="#1F2933"/><rect x="6" y="4" width="3" height="6" rx=".5" fill="#1F2933"/><rect x="11" y="2" width="3" height="8" rx=".5" fill="#1F2933"/></svg>
+          <svg width="22" height="10" viewBox="0 0 26 12"><rect x="1" y="1" width="22" height="10" rx="3" stroke="#1F2933" fill="none"/><rect x="3" y="3" width="14" height="6" rx="1.5" fill="#1F2933"/><rect x="24" y="4" width="1.5" height="4" rx=".5" fill="#1F2933"/></svg>
+        </div>
+      </div>
+
+      <div class="header-row">
+        <div class="brand">The <span class="y">Pond</span>.</div>
+        <div class="pill">47 / 52 canards</div>
+      </div>
+
+      <div class="g-sub">
+        <h2>La mare</h2>
+        <p>47 souvenirs partagés depuis 20h</p>
+      </div>
+
+      <div class="reveal-banner">
+        <div class="moon"></div>
+        <div><b>7 souvenirs</b> se débloqueront avec le café à 11h</div>
+      </div>
+
+      <div class="filter-row">
+        <span class="chip active">Tout · 47</span>
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="3"/></svg>
+          28
+        </span>
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M22 8 L16 12 L22 16 Z"/></svg>
+          12
+        </span>
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/></svg>
+          7
+        </span>
+      </div>
+
+      <div class="grid-mason">
+        <!-- Couple post (champagne border) -->
+        <div class="card couple">
+          <div class="card-media h-m">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+          <div class="card-foot">
+            <div class="av white"><svg width="14" height="11" viewBox="0 0 64 50" style="--body:#EADFB8; --belly:#F5EBC9; --shade:#C9B988"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Marie & Sarah</b> · 23h12</div>
+          </div>
+        </div>
+        <!-- Photo small -->
+        <div class="card">
+          <div class="card-media h-s">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+          </div>
+          <div class="card-foot">
+            <div class="av"><svg width="14" height="11" viewBox="0 0 64 50"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Léa</b> · 21h47</div>
+          </div>
+        </div>
+        <!-- Vocal large -->
+        <div class="card">
+          <div class="card-vocal">
+            <div class="icon-mic">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+            </div>
+            <div class="wf">
+              <span style="height:14px"></span><span style="height:22px"></span><span style="height:30px"></span><span style="height:18px"></span>
+              <span style="height:36px"></span><span style="height:42px"></span><span style="height:24px"></span><span style="height:14px"></span>
+              <span style="height:26px"></span><span style="height:38px"></span><span style="height:30px"></span><span style="height:18px"></span>
+              <span style="height:24px"></span><span style="height:32px"></span><span style="height:14px"></span><span style="height:8px"></span>
+            </div>
+            <div class="ts-vocal">0:42</div>
+          </div>
+          <div class="card-foot">
+            <div class="av blue"><svg width="14" height="11" viewBox="0 0 64 50" style="--body:#7AB8D9; --belly:#A9D8E5; --shade:#4E91B5"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Tonton Jean</b> · 22h05</div>
+          </div>
+        </div>
+        <!-- Clip -->
+        <div class="card">
+          <div class="card-media video h-m">
+            <div class="play-circle"><svg width="14" height="14" viewBox="0 0 24 24" fill="#1F2933"><polygon points="6,4 20,12 6,20"/></svg></div>
+            <div class="ts">0:14</div>
+          </div>
+          <div class="card-foot">
+            <div class="av"><svg width="14" height="11" viewBox="0 0 64 50"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Marc</b> · 21h32</div>
+          </div>
+        </div>
+        <!-- Photo medium -->
+        <div class="card">
+          <div class="card-media h-m">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+          </div>
+          <div class="card-foot">
+            <div class="av white"><svg width="14" height="11" viewBox="0 0 64 50" style="--body:#EADFB8; --belly:#F5EBC9; --shade:#C9B988"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Camille</b> · 21h28</div>
+          </div>
+        </div>
+        <!-- Photo small -->
+        <div class="card">
+          <div class="card-media h-s">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+          </div>
+          <div class="card-foot">
+            <div class="av"><svg width="14" height="11" viewBox="0 0 64 50"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Romain</b> · 21h11</div>
+          </div>
+        </div>
+        <!-- Clip 2 -->
+        <div class="card">
+          <div class="card-media video h-s">
+            <div class="play-circle"><svg width="14" height="14" viewBox="0 0 24 24" fill="#1F2933"><polygon points="6,4 20,12 6,20"/></svg></div>
+            <div class="ts">0:09</div>
+          </div>
+          <div class="card-foot">
+            <div class="av"><svg width="14" height="11" viewBox="0 0 64 50"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Sophie</b> · 20h54</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-ind"></div>
+    </div>
+  </div>
+
+  <!-- =========================================
+       COLONNE 2 — CLIP
+       ========================================= -->
+  <div class="col">
+    <div class="col-label"><span class="num">02</span>CLIP · CANCAN</div>
+    <div class="phone dark">
+      <div class="clip-stage"></div>
+      <div class="clip-pause">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><polygon points="6,4 20,12 6,20"/></svg>
+      </div>
+
+      <!-- status bar over the dark stage -->
+      <div class="status-bar">
+        <span>23:43</span>
+        <div class="icons">
+          <svg width="14" height="9" viewBox="0 0 18 11"><rect x="1" y="6" width="3" height="4" rx=".5" fill="#fff"/><rect x="6" y="4" width="3" height="6" rx=".5" fill="#fff"/><rect x="11" y="2" width="3" height="8" rx=".5" fill="#fff"/></svg>
+          <svg width="22" height="10" viewBox="0 0 26 12"><rect x="1" y="1" width="22" height="10" rx="3" stroke="#fff" fill="none"/><rect x="3" y="3" width="14" height="6" rx="1.5" fill="#fff"/><rect x="24" y="4" width="1.5" height="4" rx=".5" fill="#fff"/></svg>
+        </div>
+      </div>
+
+      <div class="clip-top">
+        <div class="x">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+        </div>
+        <div class="pill">47 / 52 canards</div>
+      </div>
+
+      <div class="clip-side">
+        <div class="act">
+          <div class="act-ic liked">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          </div>
+          <div class="n">12</div>
+        </div>
+        <div class="act">
+          <div class="act-ic">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-1.4 4.6L21 21l-4.9-1.4a8.5 8.5 0 1 1 4.9-8.1z"/></svg>
+          </div>
+          <div class="n">3</div>
+        </div>
+        <div class="act">
+          <div class="act-ic">
+            <svg width="18" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          </div>
+        </div>
+        <div class="me">
+          <svg width="28" height="22" viewBox="0 0 64 50"><use href="#duck-glyph"/></svg>
+        </div>
+      </div>
+
+      <div class="clip-bottom">
+        <div class="row">
+          <div class="av"><svg width="20" height="16" viewBox="0 0 64 50" style="--body:#EADFB8; --belly:#F5EBC9; --shade:#C9B988"><use href="#duck-glyph"/></svg></div>
+          <div class="who">Léa, la cousine de Marie</div>
+        </div>
+        <p class="cap">Marc fait son discours, c'est trop bien 🥹</p>
+        <div class="ts">
+          <span>il y a 4 min · 0:14</span>
+          <span class="wave-mini">
+            <span style="animation-delay:0s"></span>
+            <span style="animation-delay:.15s"></span>
+            <span style="animation-delay:.3s"></span>
+            <span style="animation-delay:.45s"></span>
+          </span>
+        </div>
+      </div>
+
+      <div class="clip-swipe">↑ swipe pour le suivant</div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+
+  <!-- =========================================
+       COLONNE 3 — VOCAL
+       ========================================= -->
+  <div class="col">
+    <div class="col-label"><span class="num">03</span>VOCAL · COIN-COIN</div>
+    <div class="phone">
+      <div class="status-bar">
+        <span>23:43</span>
+        <div class="icons">
+          <svg width="14" height="9" viewBox="0 0 18 11"><rect x="1" y="6" width="3" height="4" rx=".5" fill="#1F2933"/><rect x="6" y="4" width="3" height="6" rx=".5" fill="#1F2933"/><rect x="11" y="2" width="3" height="8" rx=".5" fill="#1F2933"/></svg>
+          <svg width="22" height="10" viewBox="0 0 26 12"><rect x="1" y="1" width="22" height="10" rx="3" stroke="#1F2933" fill="none"/><rect x="3" y="3" width="14" height="6" rx="1.5" fill="#1F2933"/><rect x="24" y="4" width="1.5" height="4" rx=".5" fill="#1F2933"/></svg>
+        </div>
+      </div>
+
+      <div class="header-row">
+        <div class="brand">The <span class="y">Pond</span>.</div>
+        <div class="pill">47 / 52 canards</div>
+      </div>
+
+      <div class="v-back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 6 9 12 15 18"/></svg>
+        Retour à la mare
+      </div>
+
+      <div class="v-hero">
+        <div class="av">
+          <svg width="74" height="58" viewBox="0 0 64 50" style="--body:#EADFB8; --belly:#F5EBC9; --shade:#C9B988"><use href="#duck-glyph"/></svg>
+        </div>
+        <h2>Léa, la cousine<br/>de Marie</h2>
+        <div class="ts-hero">21h47 · à l'instant</div>
+      </div>
+
+      <div class="v-wave" id="vwave"></div>
+      <div class="v-times">
+        <span class="now">0:23</span>
+        <span>0:42</span>
+      </div>
+
+      <div class="v-play-wrap">
+        <button class="v-play">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="5" width="3.5" height="14" rx="1"/><rect x="13.5" y="5" width="3.5" height="14" rx="1"/></svg>
+        </button>
+      </div>
+
+      <p class="v-cap">Un petit mot pour les mariées 💛</p>
+
+      <div class="v-acts">
+        <div class="v-pill heart">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9z"/></svg>
+          8 cœurs
+        </div>
+        <div class="v-pill reply">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/></svg>
+          Répondre
+        </div>
+      </div>
+
+      <div class="v-nav">
+        <span>← Précédent</span>
+        <span>Suivant →</span>
+      </div>
+
+      <div class="home-ind"></div>
+    </div>
+  </div>
+
+  <!-- =========================================
+       COLONNE 4 — MODÉRATION
+       ========================================= -->
+  <div class="col">
+    <div class="col-label"><span class="num">04</span>MODÉRATION · TÉMOINS</div>
+    <div class="phone">
+      <div class="status-bar">
+        <span>23:43</span>
+        <div class="icons">
+          <svg width="14" height="9" viewBox="0 0 18 11"><rect x="1" y="6" width="3" height="4" rx=".5" fill="#1F2933"/><rect x="6" y="4" width="3" height="6" rx=".5" fill="#1F2933"/><rect x="11" y="2" width="3" height="8" rx=".5" fill="#1F2933"/></svg>
+          <svg width="22" height="10" viewBox="0 0 26 12"><rect x="1" y="1" width="22" height="10" rx="3" stroke="#1F2933" fill="none"/><rect x="3" y="3" width="14" height="6" rx="1.5" fill="#1F2933"/><rect x="24" y="4" width="1.5" height="4" rx=".5" fill="#1F2933"/></svg>
+        </div>
+      </div>
+
+      <div class="header-row">
+        <div class="brand">The <span class="y">Pond</span>.</div>
+        <div class="pill shield">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L4 5v7c0 5 3.5 9 8 10 4.5-1 8-5 8-10V5z"/></svg>
+          Modération
+        </div>
+      </div>
+
+      <div class="m-welcome">
+        <h2>Bonsoir Marc</h2>
+        <p>Témoin du marié · accès modération</p>
+      </div>
+
+      <div class="m-stats">
+        <div class="m-stat">
+          <div class="v">47</div>
+          <div class="l">posts</div>
+        </div>
+        <div class="m-stat warn">
+          <div class="v">0</div>
+          <div class="l">signalés</div>
+        </div>
+        <div class="m-stat lock">
+          <div class="v">7</div>
+          <div class="l">verrouillés</div>
+        </div>
+      </div>
+
+      <div class="m-section-title">
+        <span>À modérer</span>
+        <span class="count">0</span>
+      </div>
+      <div class="m-empty">
+        <div class="duck-mini">
+          <svg width="44" height="34" viewBox="0 0 64 50"><use href="#duck-glyph"/></svg>
+        </div>
+        <p><b>Aucun contenu à modérer</b><br/><span class="quiet">La mare est paisible 🌙</span></p>
+      </div>
+
+      <div class="m-section-title" style="margin-top:14px">
+        <span>Paramètres de la mare</span>
+      </div>
+
+      <div class="m-toggle">
+        <div class="m-toggle-row">
+          <div class="lbl">Défis activés</div>
+          <div class="switch"></div>
+        </div>
+        <div class="m-toggle-desc">Propose des micro-missions aux invités</div>
+      </div>
+      <div class="m-toggle">
+        <div class="m-toggle-row">
+          <div class="lbl">Révélation temporelle</div>
+          <div class="switch on"></div>
+        </div>
+        <div class="m-toggle-desc">Certains contenus se débloquent au café</div>
+      </div>
+      <div class="m-toggle">
+        <div class="m-toggle-row">
+          <div class="lbl">Mode nuit après 23h</div>
+          <div class="switch on"></div>
+        </div>
+        <div class="m-toggle-desc">Couleurs adoucies pour la fin de soirée</div>
+      </div>
+
+      <div class="m-rule"></div>
+      <div class="m-section-title" style="margin-top:0">
+        <span>Actions</span>
+      </div>
+      <div class="m-danger">
+        <button>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="5" y1="5" x2="19" y2="19"/></svg>
+          Bloquer un canard problématique
+        </button>
+        <a href="#">Exporter toute la mare (.zip)</a>
+      </div>
+
+      <div style="height:24px"></div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Waveform on the vocal screen — 56 bars, first 23/56 played
+  (function(){
+    const host = document.getElementById('vwave');
+    if (!host) return;
+    const N = 38;
+    const playedRatio = 0.55;
+    const playedIndex = Math.round(N * playedRatio);
+    let html = '';
+    for (let i=0; i<N; i++){
+      // pseudo-random heights with a soft amplitude envelope
+      const env = 0.5 + 0.5 * Math.sin(i / N * Math.PI);
+      const r = (Math.sin(i*1.7) * 0.5 + 0.5) * 0.7 + 0.3;
+      const h = Math.round(8 + 60 * env * r);
+      html += `<span class="${i<playedIndex?'played':''}" style="height:${h}px"></span>`;
+    }
+    host.innerHTML = html;
+    // place knob over current position
+    const knob = document.createElement('div');
+    knob.className = 'progress-knob';
+    knob.style.left = (playedRatio*100) + '%';
+    host.appendChild(knob);
+  })();
+</script>
+
+</body>
+</html>

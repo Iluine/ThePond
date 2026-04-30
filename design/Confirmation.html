@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>The Pond — Confirmation post-upload (mobile 380)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pond-deep:#0E4F6B;
+    --pond-deeper:#062E40;
+    --pond-mid:#3E8AA8;
+    --pond-light:#A9D8E5;
+    --pond-pale:#E6F3F8;
+    --cream:#FAF3E3;
+    --cream-deep:#F2E8CF;
+    --cream-line:#EADFB8;
+    --duck:#FFC93C;
+    --duck-deep:#F2B400;
+    --champagne:#E8C77A;
+    --champagne-deep:#C9A347;
+    --ink:#1F2933;
+    --ink-soft:#5A6B7A;
+
+    --display:"Caprasimo","Cooper Black",Georgia,serif;
+    --sans:"DM Sans",-apple-system,"Segoe UI",system-ui,sans-serif;
+    --mono:"DM Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--sans);
+    background:#1a1a1a;
+    color:var(--ink);
+    min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    padding:32px 16px;
+  }
+
+  /* phone frame */
+  .phone{
+    width:380px; min-height:820px;
+    background:var(--cream);
+    border-radius:36px;
+    overflow:hidden;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,.6), 0 0 0 8px #111, 0 0 0 9px #2a2a2a;
+    position:relative;
+    background-image:
+      radial-gradient(420px 320px at 0% 0%, rgba(169,216,229,.55), transparent 60%),
+      radial-gradient(380px 300px at 100% 0%, rgba(255,201,60,.22), transparent 60%);
+  }
+  .label{
+    position:absolute; top:-28px; left:0; right:0; text-align:center;
+    font-family:var(--mono); font-size:12px; letter-spacing:.14em;
+    color:#E6DFCB; text-transform:uppercase;
+  }
+  .status-bar{
+    height:44px; padding:14px 24px 0;
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:var(--sans); font-weight:600; font-size:15px; color:var(--ink);
+  }
+  .status-bar .icons{display:flex; gap:6px; align-items:center;}
+
+  /* ---- HEADER ---- */
+  .header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px 6px;
+  }
+  .brand{
+    font-family:var(--sans); font-weight:700; font-size:18px;
+    color:var(--pond-deep); letter-spacing:.005em;
+  }
+  .brand .y{ color:var(--duck-deep); }
+  .pill{
+    font-family:var(--mono); font-size:13px; font-weight:500;
+    padding:8px 14px; border-radius:999px;
+    background:var(--cream-deep);
+    color:var(--pond-deep);
+    border:1px solid var(--cream-line);
+    letter-spacing:.02em;
+    display:inline-flex; align-items:center; gap:4px;
+    white-space:nowrap; flex-shrink:0;
+  }
+  /* Just-incremented number bumps subtly */
+  .pill .num{
+    color:var(--duck-deep); font-weight:700; font-size:15px;
+    display:inline-block;
+    animation: bumpIn 700ms cubic-bezier(.2,.9,.3,1.4) both 200ms;
+  }
+  @keyframes bumpIn{
+    0%   { transform:scale(.6); opacity:0; }
+    60%  { transform:scale(1.18); opacity:1; }
+    100% { transform:scale(1); }
+  }
+
+  /* ---- COMIC STRIP : 3 KEY FRAMES ---- */
+  .strip{
+    margin:18px 16px 6px;
+    background:linear-gradient(180deg, var(--pond-pale) 0%, #EAF7FB 100%);
+    border-radius:22px;
+    border:1px solid rgba(169,216,229,.6);
+    padding:18px 12px 16px;
+    display:flex; align-items:stretch; justify-content:space-between;
+    position:relative;
+  }
+  .frame{
+    flex:1;
+    height:230px;
+    border-radius:14px;
+    background:rgba(255,255,255,.5);
+    backdrop-filter: blur(4px);
+    border:1px solid rgba(169,216,229,.4);
+    position:relative;
+    overflow:hidden;
+  }
+  .frame .num-tag{
+    position:absolute; top:8px; left:8px;
+    font-family:var(--mono); font-size:9px; letter-spacing:.16em;
+    color:var(--pond-mid); text-transform:uppercase;
+    background:rgba(255,255,255,.7);
+    padding:2px 6px; border-radius:6px;
+  }
+  /* dotted arrow between frames */
+  .arrow{
+    width:22px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--pond-mid);
+  }
+  .arrow svg{ display:block; }
+
+  /* FRAME 1 — duck mid-air, "Splash !" near it */
+  .f1 .duck-air{
+    position:absolute; top:38px; left:46%;
+    transform:translateX(-50%) rotate(14deg);
+    filter: drop-shadow(0 8px 8px rgba(14,79,107,.25));
+  }
+  .f1 .splash-word{
+    position:absolute; top:80px; right:8px;
+    font-family:var(--display); font-size:18px; color:var(--pond-deep);
+    transform:rotate(-8deg);
+  }
+  .f1 .water{
+    position:absolute; bottom:0; left:0; right:0; height:46px;
+    background:linear-gradient(180deg, var(--pond-light) 0%, var(--pond-mid) 100%);
+  }
+  .f1 .water::before{
+    content:""; position:absolute; top:-3px; left:0; right:0; height:6px;
+    background:
+      radial-gradient(circle at 12% 0, rgba(255,255,255,.7) 0 1.2px, transparent 1.5px),
+      radial-gradient(circle at 38% 50%, rgba(255,255,255,.5) 0 1.5px, transparent 2px),
+      radial-gradient(circle at 70% 0, rgba(255,255,255,.6) 0 1.2px, transparent 1.5px),
+      radial-gradient(circle at 90% 50%, rgba(255,255,255,.5) 0 1.5px, transparent 2px);
+  }
+  .f1 .speed-line{
+    position:absolute; top:108px; left:30%;
+    width:2px; height:18px; background:var(--pond-mid); opacity:.4;
+    transform:rotate(-25deg);
+    border-radius:1px;
+  }
+  .f1 .speed-line.s2{ left:55%; top:120px; height:14px; opacity:.3; }
+
+  /* FRAME 2 — splash impact: ripples + droplets */
+  .f2 .water{
+    position:absolute; bottom:0; left:0; right:0; height:80px;
+    background:linear-gradient(180deg, var(--pond-light) 0%, var(--pond-mid) 100%);
+  }
+  .f2 .ripple{
+    position:absolute; left:50%; bottom:50px;
+    transform:translate(-50%, 50%);
+    border-radius:50%;
+    border:2px solid var(--pond-pale);
+    opacity:.6;
+  }
+  .f2 .r1{ width:50px; height:14px; opacity:.85; }
+  .f2 .r2{ width:78px; height:22px; opacity:.55; }
+  .f2 .r3{ width:108px; height:32px; opacity:.3; }
+  .f2 .head{
+    /* tip of the duck head poking out at impact */
+    position:absolute; left:50%; bottom:54px;
+    transform:translate(-50%, 0);
+    width:24px; height:14px;
+    background:var(--duck);
+    border:1.5px solid var(--pond-deep);
+    border-radius:50% 50% 0 0 / 100% 100% 0 0;
+    border-bottom:none;
+  }
+  .f2 .head .eye{
+    position:absolute; top:5px; left:14px;
+    width:3px; height:3px; border-radius:50%; background:var(--ink);
+  }
+  .f2 .droplet{
+    position:absolute;
+    width:5px; height:7px;
+    background:var(--pond-mid);
+    border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+    transform:rotate(0deg);
+  }
+  /* droplets cluster just above the splash point */
+  .f2 .d1{ bottom:96px; left:24%; transform:rotate(-35deg) scale(1); }
+  .f2 .d2{ bottom:118px; left:38%; transform:rotate(-15deg) scale(1.1); }
+  .f2 .d3{ bottom:128px; left:52%; transform:translateX(-50%) scale(1.2); }
+  .f2 .d4{ bottom:118px; right:32%; transform:rotate(15deg) scale(1.1); }
+  .f2 .d5{ bottom:96px; right:22%; transform:rotate(35deg) scale(1); }
+  .f2 .d6, .f2 .d7{ position:absolute; width:4px; height:5px; background:var(--pond-mid); border-radius:50%; opacity:.6; }
+  .f2 .d6{ bottom:84px; left:42%; }
+  .f2 .d7{ bottom:84px; right:40%; }
+
+  /* FRAME 3 — surfaced & joined the mare */
+  .f3 .water{
+    position:absolute; bottom:0; left:0; right:0; top:34%;
+    background:linear-gradient(180deg, var(--pond-light) 0%, var(--pond-mid) 100%);
+  }
+  .f3 .water::before{
+    /* lily pads */
+    content:""; position:absolute; top:18%; left:8%; width:14px; height:6px;
+    background:#4FA86B; border-radius:50%; opacity:.7;
+    box-shadow:
+      52px 24px 0 0 #4FA86B,
+      -2px 30px 0 -1px #4FA86B;
+  }
+  .f3 .pond-duck{
+    position:absolute; transform:translate(-50%,-50%);
+  }
+  /* highlight ring on the user's duck — champagne ring + soft halo for visibility on water */
+  .f3 .pond-duck.me{
+    filter: drop-shadow(0 4px 6px rgba(14,79,107,.3));
+  }
+  .f3 .pond-duck.me::before{
+    content:""; position:absolute; left:50%; top:62%;
+    transform:translate(-50%,-50%);
+    width:54px; height:18px;
+    border-radius:50%;
+    border:2px solid var(--champagne-deep);
+    background:radial-gradient(closest-side, rgba(255,255,255,.5), transparent 80%);
+    z-index:-1;
+  }
+  .f3 .pond-duck.me::after{
+    content:"TOI"; position:absolute;
+    left:100%; top:0; transform:translate(2px, -4px);
+    font-family:var(--mono); font-size:8px; font-weight:500; letter-spacing:.14em;
+    color:var(--champagne-deep);
+    background:rgba(250,243,227,.95);
+    padding:1px 5px; border-radius:5px;
+    border:1px solid var(--champagne-deep);
+    white-space:nowrap;
+  }
+
+  /* ---- CONFIRMATION MESSAGE ---- */
+  .confirm{
+    text-align:center;
+    padding:14px 24px 10px;
+  }
+  .confirm h1{
+    margin:0;
+    font-family:var(--display); font-size:36px; line-height:1; color:var(--pond-deep);
+  }
+  .confirm h1 .bang{ color:var(--duck-deep); margin-left:2px; }
+  .confirm p{
+    margin:8px 0 0;
+    font-family:var(--sans); font-size:16px; color:var(--ink-soft); line-height:1.3;
+  }
+
+  /* ---- POSTED CONTENT PREVIEW ---- */
+  .preview{
+    margin:14px 16px 4px;
+    padding:14px 14px 12px;
+    background:var(--cream);
+    border:1px solid var(--cream-line);
+    border-radius:18px;
+    box-shadow: 0 6px 18px -10px rgba(14,79,107,.18);
+    display:flex; align-items:center; gap:14px;
+  }
+  .preview .thumb{
+    width:64px; height:64px; flex-shrink:0;
+    border-radius:12px;
+    background:#C8CCD0;
+    border:1px solid #B6BBC2;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff;
+  }
+  .preview .meta{ flex:1; min-width:0; }
+  .preview .top{
+    font-family:var(--sans); font-weight:600; font-size:14px; color:var(--ink);
+    margin-bottom:2px;
+  }
+  .preview .bottom{
+    font-family:var(--mono); font-size:11px; color:var(--ink-soft);
+    letter-spacing:.04em;
+    display:flex; align-items:center; gap:6px;
+  }
+  .preview .bottom svg{ flex-shrink:0; }
+  .preview .live-dot{
+    width:6px; height:6px; border-radius:50%; background:#5BA85B;
+    flex-shrink:0;
+    box-shadow:0 0 0 3px rgba(91,168,91,.18);
+  }
+
+  /* ---- PRIMARY CTA ---- */
+  .cta{
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    width:calc(100% - 32px); margin:18px 16px 10px;
+    height:80px; padding:0 22px;
+    background:var(--duck); color:var(--ink);
+    font-family:var(--sans); font-weight:700; font-size:18px; letter-spacing:.02em;
+    border:none; border-radius:22px; cursor:pointer;
+    box-shadow: 0 4px 0 var(--duck-deep), 0 14px 28px -10px rgba(242,180,0,.55);
+    transition: transform .1s ease, box-shadow .1s ease;
+  }
+  .cta:active{ transform:translateY(3px); box-shadow:0 1px 0 var(--duck-deep), 0 6px 14px -4px rgba(242,180,0,.4); }
+  .cta .ic{
+    width:42px; height:42px; border-radius:12px;
+    background:rgba(255,255,255,.5);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--pond-deep);
+    flex-shrink:0;
+  }
+
+  /* ---- SECONDARY ACTIONS ---- */
+  .secondary{
+    text-align:center;
+    padding:6px 24px 18px;
+    font-family:var(--sans); font-size:14px; color:var(--pond-mid);
+  }
+  .secondary a{
+    color:var(--pond-mid); text-decoration:none;
+  }
+  .secondary a:hover{ color:var(--pond-deep); }
+  .secondary .dot{
+    color:var(--pond-light); margin:0 10px; font-weight:700;
+  }
+
+  /* home indicator */
+  .home-ind{
+    height:18px; display:flex; align-items:center; justify-content:center;
+  }
+  .home-ind::after{ content:""; width:120px; height:5px; border-radius:3px; background:rgba(31,41,51,.45); }
+</style>
+</head>
+<body>
+
+<!-- duck symbol library (matching welcome screen) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="duck-glyph" viewBox="0 0 64 50">
+      <ellipse cx="32" cy="44" rx="26" ry="3.5" fill="#1F2933" opacity=".12"/>
+      <ellipse cx="30" cy="32" rx="24" ry="11" fill="var(--body, #FFC93C)"/>
+      <ellipse cx="26" cy="35" rx="16" ry="5" fill="var(--belly, #FFE08A)" opacity=".7"/>
+      <path d="M52 28 Q60 24 58 32 Q54 32 52 30 Z" fill="var(--shade, #F2B400)"/>
+      <circle cx="46" cy="20" r="11" fill="var(--body, #FFC93C)"/>
+      <path d="M55 19 L62 22 L55 25 Z" fill="#F2B400"/>
+      <path d="M55 21 L60 22.5 L55 24 Z" fill="#C9881A" opacity=".5"/>
+      <circle cx="49" cy="17" r="2.2" fill="#1F2933"/>
+      <circle cx="49.7" cy="16.4" r=".7" fill="#FAF3E3"/>
+      <path d="M28 26 Q34 22 40 28 Q36 32 28 30 Z" fill="var(--shade, #F2B400)"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div style="position:relative">
+  <div class="label">Confirmation post-upload · Mobile 380 · Photo</div>
+
+  <div class="phone">
+    <div class="status-bar">
+      <span>23:43</span>
+      <div class="icons">
+        <svg width="18" height="11" viewBox="0 0 18 11"><rect x="1" y="6" width="3" height="4" rx=".5" fill="#1F2933"/><rect x="6" y="4" width="3" height="6" rx=".5" fill="#1F2933"/><rect x="11" y="2" width="3" height="8" rx=".5" fill="#1F2933"/><rect x="16" y="0" width="2" height="10" rx=".5" fill="#1F2933" opacity=".4"/></svg>
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none"><path d="M8 9.5l-7-6.2A11 11 0 0 1 8 1a11 11 0 0 1 7 2.3z" stroke="#1F2933"/></svg>
+        <svg width="26" height="12" viewBox="0 0 26 12"><rect x="1" y="1" width="22" height="10" rx="3" stroke="#1F2933" fill="none"/><rect x="3" y="3" width="16" height="6" rx="1.5" fill="#1F2933"/><rect x="24" y="4" width="1.5" height="4" rx=".5" fill="#1F2933"/></svg>
+      </div>
+    </div>
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="brand">The <span class="y">Pond</span>.</div>
+      <div class="pill"><span class="num">43</span> / 52 canards</div>
+    </div>
+
+    <!-- 3-FRAME COMIC STRIP -->
+    <div class="strip">
+      <!-- FRAME 1 -->
+      <div class="frame f1">
+        <div class="num-tag">01</div>
+        <div class="speed-line"></div>
+        <div class="speed-line s2"></div>
+        <div class="duck-air">
+          <svg width="60" height="47" viewBox="0 0 64 50" style="--body:#FFC93C; --belly:#FFE08A; --shade:#F2B400;"><use href="#duck-glyph"/></svg>
+        </div>
+        <div class="splash-word">Splash !</div>
+        <div class="water"></div>
+      </div>
+
+      <div class="arrow">
+        <svg width="14" height="6" viewBox="0 0 14 6">
+          <line x1="0" y1="3" x2="10" y2="3" stroke="currentColor" stroke-width="1.5" stroke-dasharray="1.5 1.8"/>
+          <polyline points="9,1 13,3 9,5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <!-- FRAME 2 -->
+      <div class="frame f2">
+        <div class="num-tag">02</div>
+        <div class="droplet d1"></div>
+        <div class="droplet d2"></div>
+        <div class="droplet d3"></div>
+        <div class="droplet d4"></div>
+        <div class="droplet d5"></div>
+        <div class="d6"></div>
+        <div class="d7"></div>
+        <div class="water"></div>
+        <div class="ripple r3"></div>
+        <div class="ripple r2"></div>
+        <div class="ripple r1"></div>
+        <div class="head"><div class="eye"></div></div>
+      </div>
+
+      <div class="arrow">
+        <svg width="14" height="6" viewBox="0 0 14 6">
+          <line x1="0" y1="3" x2="10" y2="3" stroke="currentColor" stroke-width="1.5" stroke-dasharray="1.5 1.8"/>
+          <polyline points="9,1 13,3 9,5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <!-- FRAME 3 -->
+      <div class="frame f3">
+        <div class="num-tag">03</div>
+        <div class="water"></div>
+        <!-- ducks scattered -->
+        <div id="f3-ducks"></div>
+      </div>
+    </div>
+
+    <!-- CONFIRMATION MESSAGE -->
+    <div class="confirm">
+      <h1>Splash<span class="bang"> !</span></h1>
+      <p>Ton coin-coin a rejoint la mare</p>
+    </div>
+
+    <!-- POSTED CONTENT PREVIEW -->
+    <div class="preview">
+      <div class="thumb">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="top">Ta photo</div>
+        <div class="bottom">
+          <span class="live-dot"></span>
+          en ligne · à l'instant
+        </div>
+      </div>
+    </div>
+
+    <!-- PRIMARY CTA -->
+    <button class="cta">
+      <span class="ic">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+      </span>
+      CONTINUER À BARBOTER
+    </button>
+
+    <!-- SECONDARY -->
+    <div class="secondary">
+      <a href="#">Faire autre chose</a>
+      <span class="dot">·</span>
+      <a href="#">Voir Mare TV →</a>
+    </div>
+
+    <div class="home-ind"></div>
+  </div>
+</div>
+
+<script>
+  // Frame 3: 5 random guests + the user's duck (yellow, highlighted)
+  (function(){
+    const host = document.getElementById('f3-ducks');
+    if (!host) return;
+    const W = 92, H = 90; // approx inner frame size after padding
+    const YELLOW = {body:'#FFC93C', belly:'#FFE08A', shade:'#F2B400'};
+    const WHITE  = {body:'#EADFB8', belly:'#F5EBC9', shade:'#C9B988'};
+    const BLUE   = {body:'#7AB8D9', belly:'#A9D8E5', shade:'#4E91B5'};
+    function pickGuest(){
+      const r = Math.random();
+      if (r < 0.78) return YELLOW;
+      if (r < 0.94) return WHITE;
+      return BLUE;
+    }
+    function styleFor(v){
+      return `--body:${v.body}; --belly:${v.belly}; --shade:${v.shade};`;
+    }
+    function makeDuck(v, w){
+      const h = Math.round(w * 50/64);
+      return `<svg width="${w}" height="${h}" viewBox="0 0 64 50" style="${styleFor(v)}"><use href="#duck-glyph"/></svg>`;
+    }
+    // Hand-placed positions (in % of frame) so the user's duck sits front-center
+    // Other 5 ducks scattered, no row alignment
+    // Carefully placed: 5 guests around the user's duck (52%, 68%), all clearly visible
+    // Frame is ~92x230 inner. Water starts at y:34%. translate(-50%,-50%) means y must be ≤ ~88% to keep duck in frame.
+    const guests = [
+      {x:22, y:48, w:18},  // upper-left (back)
+      {x:78, y:50, w:20},  // upper-right (back)
+      {x:18, y:78, w:16},  // lower-left (front)
+      {x:82, y:80, w:18},  // lower-right (front)
+      {x:50, y:88, w:14}   // foreground center, smallest
+    ];
+    guests.forEach(g => {
+      const v = pickGuest();
+      const el = document.createElement('div');
+      el.className = 'pond-duck';
+      el.style.left = g.x + '%';
+      el.style.top  = g.y + '%';
+      el.style.zIndex = Math.round(g.y / 10);
+      el.innerHTML = makeDuck(v, g.w);
+      host.appendChild(el);
+    });
+    // user's duck — front-center, larger, with halo
+    const me = document.createElement('div');
+    me.className = 'pond-duck me';
+    me.style.left = '50%';
+    me.style.top  = '64%';
+    me.style.zIndex = 20;
+    me.innerHTML = makeDuck(YELLOW, 38);
+    host.appendChild(me);
+  })();
+</script>
+
+</body>
+</html>

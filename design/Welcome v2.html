@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>The Pond — Bienvenue (mobile 380)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pond-deep:#0E4F6B;
+    --pond-deeper:#062E40;
+    --pond-mid:#3E8AA8;
+    --pond-light:#A9D8E5;
+    --pond-pale:#E6F3F8;
+    --cream:#FAF3E3;
+    --cream-deep:#F2E8CF;
+    --cream-line:#EADFB8;
+    --duck:#FFC93C;
+    --duck-deep:#F2B400;
+    --champagne:#E8C77A;
+    --champagne-deep:#C9A347;
+    --ink:#1F2933;
+    --ink-soft:#5A6B7A;
+
+    --display:"Caprasimo","Cooper Black",Georgia,serif;
+    --sans:"DM Sans",-apple-system,"Segoe UI",system-ui,sans-serif;
+    --mono:"DM Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--sans);
+    background:#1a1a1a;
+    color:var(--ink);
+    min-height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    padding:32px 16px;
+  }
+
+  /* phone frame */
+  .phone{
+    width:380px; min-height:820px;
+    background:var(--cream);
+    border-radius:36px;
+    overflow:hidden;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,.6), 0 0 0 8px #111, 0 0 0 9px #2a2a2a;
+    position:relative;
+    /* same masthead radial tints as design system */
+    background-image:
+      radial-gradient(420px 320px at 0% 0%, rgba(169,216,229,.55), transparent 60%),
+      radial-gradient(380px 300px at 100% 0%, rgba(255,201,60,.22), transparent 60%);
+  }
+  .label{
+    position:absolute; top:-28px; left:0; right:0; text-align:center;
+    font-family:var(--mono); font-size:12px; letter-spacing:.14em;
+    color:#E6DFCB; text-transform:uppercase;
+  }
+  .status-bar{
+    height:44px; padding:14px 24px 0;
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:var(--sans); font-weight:600; font-size:15px; color:var(--ink);
+  }
+  .status-bar .icons{display:flex; gap:6px; align-items:center;}
+  .status-bar .icons svg{display:block}
+
+  /* ---- HEADER ---- */
+  .header{
+    text-align:center; padding:18px 24px 8px;
+  }
+  .h1{
+    font-family:var(--display); font-size:54px; line-height:1; color:var(--pond-deep);
+    margin:0;
+  }
+  .h1 .y{ color:var(--duck-deep); }
+  .sub{
+    font-family:var(--sans); font-size:13px; color:var(--ink-soft);
+    letter-spacing:.06em; margin-top:8px;
+  }
+
+  /* ---- POND TEASER ---- */
+  .pond-teaser{
+    height:100px; margin:14px 16px 6px;
+    border-radius:18px; overflow:hidden;
+    position:relative;
+    background:
+      radial-gradient(circle at 25% 30%, rgba(255,255,255,.55) 0 2px, transparent 3px),
+      radial-gradient(circle at 70% 60%, rgba(255,255,255,.45) 0 3px, transparent 4px),
+      radial-gradient(circle at 45% 80%, rgba(255,255,255,.4) 0 2px, transparent 3px),
+      radial-gradient(circle at 88% 22%, rgba(255,255,255,.35) 0 2px, transparent 3px),
+      linear-gradient(180deg, var(--pond-light) 0%, var(--pond-mid) 100%);
+    box-shadow:inset 0 0 0 1px rgba(14,79,107,.08);
+  }
+  .pond-teaser .lily{
+    position:absolute; width:18px; height:8px; border-radius:50%;
+    background:#4FA86B; opacity:.65;
+  }
+  .pond-duck{
+    position:absolute; transform:translate(-50%,-50%); pointer-events:none;
+  }
+  .teaser-cap{
+    text-align:center; font-family:var(--mono); font-size:13px; letter-spacing:.04em;
+    color:var(--ink-soft); margin:8px 0 14px;
+  }
+  .teaser-cap b{ color:var(--duck-deep); font-weight:500; }
+
+  /* ---- DUCK GEN CARD ---- */
+  .gen{
+    margin:0 16px; padding:24px 20px 22px;
+    background:var(--cream-deep);
+    border-radius:24px;
+    box-shadow:inset 0 0 0 1px var(--cream-line), 0 8px 24px -10px rgba(14,79,107,.18);
+    text-align:center;
+    position:relative;
+  }
+  .duck-stage{
+    height:160px;
+    display:flex; align-items:flex-end; justify-content:center;
+    position:relative;
+  }
+  /* Outlined-glyph fallback (in case CSS targeting was needed); main outline now lives inside the symbol */
+  .duck-stage .ground{
+    position:absolute; bottom:6px; left:50%; transform:translateX(-50%);
+    width:140px; height:12px; border-radius:50%;
+    background:radial-gradient(closest-side, rgba(14,79,107,.22), transparent 70%);
+  }
+  .duck-bob{
+    animation: bob 2.6s ease-in-out infinite;
+    filter: drop-shadow(0 12px 14px rgba(14,79,107,.22));
+  }
+  @keyframes bob{
+    0%,100%{ transform:translateY(0) rotate(-1deg); }
+    50%   { transform:translateY(-6px) rotate(1.5deg); }
+  }
+  /* pseudo gets the full card width on its own row; dice button sits below it */
+  .pseudo-row{
+    margin-top:8px; padding:0 4px;
+  }
+  .pseudo-wrap{
+    width:100%;
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .pseudo{
+    font-family:var(--display); color:var(--pond-deep);
+    line-height:1.1;
+    width:100%; text-align:center;
+    white-space:nowrap; overflow:visible;
+    padding:0 4px;
+    /* default 24px; adaptive class shrinks to 20px, then 17px for very long */
+    font-size:24px;
+  }
+  .pseudo.long{ font-size:20px; }
+  .pseudo.xlong{ font-size:17px; letter-spacing:-.01em; }
+  .reroll-block{
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    margin-top:14px;
+  }
+  .reroll{
+    width:56px; height:56px; border-radius:50%;
+    border:none;
+    background:var(--pond-mid); color:white;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    box-shadow: 0 3px 0 var(--pond-deep), 0 8px 18px -6px rgba(14,79,107,.45);
+    transition: transform .12s ease, box-shadow .12s ease;
+    position:relative;
+  }
+  .reroll svg{ display:block; }
+  .reroll::after{
+    content:""; position:absolute; inset:-5px; border-radius:50%;
+    border:2px solid var(--duck);
+    opacity:0;
+    animation: pulse 2.4s ease-out infinite;
+  }
+  @keyframes pulse{
+    0%   { transform:scale(0.92); opacity:.55; }
+    70%  { transform:scale(1.22); opacity:0;   }
+    100% { transform:scale(1.28); opacity:0;   }
+  }
+  .reroll:active{ transform:translateY(2px); box-shadow:0 1px 0 var(--pond-deep), 0 4px 10px -4px rgba(14,79,107,.35); }
+  .reroll-label{
+    font-family:var(--mono); font-size:11px; letter-spacing:.08em;
+    color:var(--ink-soft); text-transform:uppercase;
+  }
+
+
+  /* ---- CUSTOM NAME ---- */
+  .field{
+    margin:18px 16px 0;
+  }
+  .field label{
+    display:block;
+    font-family:var(--sans); font-weight:500; font-size:14px; color:var(--ink);
+    margin-bottom:8px;
+  }
+  .field input{
+    width:100%; height:52px; padding:0 18px;
+    border-radius:14px; border:1.5px solid var(--cream-line);
+    background:var(--cream);
+    font-family:var(--sans); font-size:15px; color:var(--ink);
+    outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .field input::placeholder{ color:#9AA5B0; font-style:italic; }
+  .field input:focus{ border-color:var(--pond-mid); box-shadow:0 0 0 3px rgba(62,138,168,.18); }
+  .field .hint{
+    font-family:var(--mono); font-size:11px; letter-spacing:.04em; color:var(--ink-soft);
+    margin-top:6px;
+  }
+
+  /* ---- PRIMARY CTA ---- */
+  .cta{
+    display:block; width:calc(100% - 48px); margin:18px 24px 14px;
+    height:64px;
+    background:var(--duck); color:var(--ink);
+    font-family:var(--sans); font-weight:700; font-size:17px; letter-spacing:.02em;
+    border:none; border-radius:18px; cursor:pointer;
+    box-shadow: 0 4px 0 var(--duck-deep), 0 10px 24px -8px rgba(242,180,0,.55);
+    transition: transform .1s ease, box-shadow .1s ease;
+  }
+  .cta:active{ transform:translateY(3px); box-shadow:0 1px 0 var(--duck-deep), 0 4px 10px -4px rgba(242,180,0,.4); }
+
+  /* ---- INSTALL PWA ZONE ---- */
+  .install{
+    margin-top:14px;
+    padding:18px 24px 26px;
+    background:var(--cream-deep);
+    border-top:1px solid var(--cream-line);
+    text-align:center;
+  }
+  .install button{
+    background:transparent; border:none; cursor:pointer;
+    font-family:var(--sans); font-weight:600; font-size:15px; color:var(--pond-deep);
+    display:inline-flex; align-items:center; gap:8px;
+    padding:0;
+  }
+  .install .meta{
+    font-family:var(--sans); font-size:13px; color:var(--ink-soft);
+    margin-top:6px;
+  }
+
+  /* home indicator */
+  .home-ind{
+    height:18px; display:flex; align-items:center; justify-content:center;
+  }
+  .home-ind::after{ content:""; width:120px; height:5px; border-radius:3px; background:rgba(31,41,51,.45); }
+</style>
+</head>
+<body>
+
+<!-- duck symbol library -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="duck-glyph" viewBox="0 0 64 50">
+      <ellipse cx="32" cy="44" rx="26" ry="3.5" fill="#1F2933" opacity=".12"/>
+      <ellipse cx="30" cy="32" rx="24" ry="11" fill="var(--body, #FFC93C)"/>
+      <ellipse cx="26" cy="35" rx="16" ry="5" fill="var(--belly, #FFE08A)" opacity=".7"/>
+      <path d="M52 28 Q60 24 58 32 Q54 32 52 30 Z" fill="var(--shade, #F2B400)"/>
+      <circle cx="46" cy="20" r="11" fill="var(--body, #FFC93C)"/>
+      <path d="M55 19 L62 22 L55 25 Z" fill="#F2B400"/>
+      <path d="M55 21 L60 22.5 L55 24 Z" fill="#C9881A" opacity=".5"/>
+      <circle cx="49" cy="17" r="2.2" fill="#1F2933"/>
+      <circle cx="49.7" cy="16.4" r=".7" fill="#FAF3E3"/>
+      <path d="M28 26 Q34 22 40 28 Q36 32 28 30 Z" fill="var(--shade, #F2B400)"/>
+    </symbol>
+    <symbol id="crown" viewBox="0 0 18 12">
+      <path d="M0 6 L3 0 L6 6 L9 0 L12 6 L15 0 L18 6 L18 10 L0 10 Z" fill="#E8C77A" stroke="#C9A347" stroke-width="0.5" stroke-linejoin="round"/>
+      <circle cx="3" cy="0.5" r="1.2" fill="#C9A347"/>
+      <circle cx="9" cy="0.5" r="1.2" fill="#C9A347"/>
+      <circle cx="15" cy="0.5" r="1.2" fill="#C9A347"/>
+    </symbol>
+    <linearGradient id="rainbow-grad" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="#E07A5F"/>
+      <stop offset="25%" stop-color="#FFC93C"/>
+      <stop offset="50%" stop-color="#7DC97D"/>
+      <stop offset="75%" stop-color="#7AB8D9"/>
+      <stop offset="100%" stop-color="#B58AC9"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div style="position:relative">
+  <div class="label">Bienvenue · Mobile 380</div>
+
+  <div class="phone">
+    <div class="status-bar">
+      <span>20:14</span>
+      <div class="icons">
+        <svg width="18" height="11" viewBox="0 0 18 11" fill="none"><rect x="1" y="6" width="3" height="4" rx=".5" fill="#1F2933"/><rect x="6" y="4" width="3" height="6" rx=".5" fill="#1F2933"/><rect x="11" y="2" width="3" height="8" rx=".5" fill="#1F2933"/><rect x="16" y="0" width="2" height="10" rx=".5" fill="#1F2933" opacity=".4"/></svg>
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="none"><path d="M8 9.5l-7-6.2A11 11 0 0 1 8 1a11 11 0 0 1 7 2.3z" stroke="#1F2933" stroke-width="1" fill="none"/></svg>
+        <svg width="26" height="12" viewBox="0 0 26 12"><rect x="1" y="1" width="22" height="10" rx="3" stroke="#1F2933" fill="none"/><rect x="3" y="3" width="16" height="6" rx="1.5" fill="#1F2933"/><rect x="24" y="4" width="1.5" height="4" rx=".5" fill="#1F2933"/></svg>
+      </div>
+    </div>
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="h1">The <span class="y">Pond</span>.</div>
+      <div class="sub">Le mariage de Marie &amp; Thomas</div>
+    </div>
+
+    <!-- POND TEASER -->
+    <div class="pond-teaser" id="teaser-pond"></div>
+    <div class="teaser-cap"><b>42</b> canards barbotent déjà</div>
+
+    <!-- DUCK GEN CARD -->
+    <div class="gen">
+      <div class="duck-stage">
+        <div class="ground"></div>
+        <div class="duck-bob" id="duck-main"></div>
+      </div>
+
+      <div class="pseudo-row">
+        <div class="pseudo-wrap">
+          <div class="pseudo" id="pseudo">CanardÉlégammentPerché</div>
+        </div>
+      </div>
+      <div class="reroll-block">
+        <button class="reroll" id="reroll" aria-label="Générer un nouveau canard">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="4"/>
+            <circle cx="8" cy="8" r="1.4" fill="currentColor"/>
+            <circle cx="16" cy="8" r="1.4" fill="currentColor"/>
+            <circle cx="12" cy="12" r="1.4" fill="currentColor"/>
+            <circle cx="8" cy="16" r="1.4" fill="currentColor"/>
+            <circle cx="16" cy="16" r="1.4" fill="currentColor"/>
+          </svg>
+        </button>
+        <div class="reroll-label">Reroule</div>
+      </div>
+    </div>
+
+    <!-- CUSTOM NAME -->
+    <div class="field">
+      <label for="realname">Tu préfères ton vrai prénom&nbsp;?</label>
+      <input id="realname" type="text" placeholder="ex. Léa, la cousine de Marie" />
+      <div class="hint">(optionnel · modifiable plus tard)</div>
+    </div>
+
+    <!-- PRIMARY CTA -->
+    <button class="cta">PLONGER DANS L'ÉTANG</button>
+
+    <!-- INSTALL PWA -->
+    <div class="install">
+      <button>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="6" y="2" width="12" height="20" rx="2.5"/>
+          <line x1="11" y1="18" x2="13" y2="18"/>
+        </svg>
+        Installer sur mon téléphone
+      </button>
+      <div class="meta">Pour ne pas perdre l'étang ce soir</div>
+    </div>
+
+    <div class="home-ind"></div>
+  </div>
+</div>
+
+<script>
+  // ---- VARIANTS (v0.2 ratios) ----
+  // 'White' variant uses a warm Cream tone (slightly darker than the card background)
+  // so it stays visible on Cream Deep without needing an outline.
+  const YELLOW = {body:'#FFC93C', belly:'#FFE08A', shade:'#F2B400'};
+  const WHITE  = {body:'#EADFB8', belly:'#F5EBC9', shade:'#C9B988'};
+  const BLUE   = {body:'#7AB8D9', belly:'#A9D8E5', shade:'#4E91B5'};
+
+  function pickVariant(){
+    const r = Math.random();
+    if (r < 0.80) return YELLOW;
+    if (r < 0.95) return WHITE;
+    if (r < 0.99) return BLUE;
+    return 'rainbow';
+  }
+  function styleFor(v){
+    if (v === 'rainbow') return '--body:url(#rainbow-grad); --belly:rgba(255,255,255,.55); --shade:#9F70B5;';
+    return `--body:${v.body}; --belly:${v.belly}; --shade:${v.shade};`;
+  }
+  function renderDuck(v, w){
+    const h = Math.round(w * 50/64);
+    return `<svg width="${w}" height="${h}" viewBox="0 0 64 50" style="${styleFor(v)}"><use href="#duck-glyph"/></svg>`;
+  }
+  function renderCrowned(kind, w){
+    const h = Math.round(w * 60/64);
+    const v = kind === 'white' ? WHITE : YELLOW;
+    return `<svg width="${w}" height="${h}" viewBox="0 0 64 60" style="${styleFor(v)}">
+      <use href="#duck-glyph" transform="translate(0,10)"/>
+      <g transform="translate(36,11) rotate(-6 9 5)"><use href="#crown" width="18" height="10"/></g>
+    </svg>`;
+  }
+
+  // ---- POND TEASER : couple + ~15 ducks via Poisson-disk scatter (no row alignment) ----
+  (function(){
+    const host = document.getElementById('teaser-pond');
+    const W = 348, H = 100;
+
+    // lilies
+    [[24,18],[60,80],[300,30],[260,82],[180,12],[330,68]].forEach(([l,t])=>{
+      const e = document.createElement('div');
+      e.className = 'lily';
+      e.style.left = l + 'px';
+      e.style.top  = t + 'px';
+      host.appendChild(e);
+    });
+
+    // Couple zone at exact center: reserved circle radius 38px around (W/2, H/2)
+    const cx = W/2, cy = H/2;
+    // Reserve a wider couple zone matching the new 74px scale
+    const COUPLE_R = 50;
+
+    // Bridson-style Poisson-disk sampling, min distance 28px (guest scale 40 → ~28 spacing)
+    function poissonDisk(width, height, minDist, maxAttempts = 30){
+      const cell = minDist / Math.SQRT2;
+      const cols = Math.ceil(width / cell);
+      const rows = Math.ceil(height / cell);
+      const grid = new Array(cols * rows).fill(null);
+      const points = [];
+      const active = [];
+      function fits(p){
+        // Tight inset to keep ducks fully inside the rounded clipping container
+        if (p.x < 18 || p.x > width-18 || p.y < 14 || p.y > height-14) return false;
+        // not inside reserved couple zone
+        if (Math.hypot(p.x - cx, p.y - cy) < COUPLE_R) return false;
+        const gx = Math.floor(p.x / cell), gy = Math.floor(p.y / cell);
+        for (let yy = Math.max(0, gy-2); yy <= Math.min(rows-1, gy+2); yy++){
+          for (let xx = Math.max(0, gx-2); xx <= Math.min(cols-1, gx+2); xx++){
+            const o = grid[yy*cols + xx];
+            if (o && Math.hypot(o.x - p.x, o.y - p.y) < minDist) return false;
+          }
+        }
+        return true;
+      }
+      function add(p){
+        points.push(p); active.push(p);
+        grid[Math.floor(p.y/cell)*cols + Math.floor(p.x/cell)] = p;
+      }
+      // seed away from center
+      add({x: 14, y: 14});
+      while (active.length){
+        const i = Math.floor(Math.random() * active.length);
+        const p = active[i];
+        let placed = false;
+        for (let k = 0; k < maxAttempts; k++){
+          const a = Math.random() * Math.PI * 2;
+          const r = minDist * (1 + Math.random());
+          const np = {x: p.x + Math.cos(a)*r, y: p.y + Math.sin(a)*r};
+          if (fits(np)){ add(np); placed = true; break; }
+        }
+        if (!placed) active.splice(i, 1);
+      }
+      return points;
+    }
+
+    const points = poissonDisk(W, H, 30);
+    // pick up to 15, prioritising those farthest from center for a nicer rim
+    points.sort((a,b)=> Math.hypot(b.x-cx,b.y-cy) - Math.hypot(a.x-cx,a.y-cy));
+    points.slice(0, 15).forEach(({x,y}) => {
+      const v = pickVariant();
+      const w = 22 + Math.round(Math.random()*6);
+      const el = document.createElement('div');
+      el.className = 'pond-duck';
+      el.style.left = x + 'px';
+      el.style.top  = y + 'px';
+      el.style.zIndex = Math.round(2 + (y / H) * 6);
+      el.innerHTML = renderDuck(v, w);
+      host.appendChild(el);
+    });
+
+    // couple at center, prominent 74px scale, wider apart so both crowns are clearly readable
+    function placeCouple(side, kind){
+      const w = 74;
+      const el = document.createElement('div');
+      el.className = 'pond-duck';
+      el.style.left = (cx + (side === 'left' ? -22 : 22)) + 'px';
+      el.style.top  = cy + 'px';
+      el.style.zIndex = side === 'left' ? 19 : 20;
+      el.innerHTML = renderCrowned(kind, w);
+      host.appendChild(el);
+    }
+    placeCouple('left', 'yellow');
+    placeCouple('right', 'white');
+  })();
+
+  // ---- MAIN GENERATED DUCK + PSEUDO ----
+  const ADJECTIVES = [
+    'Élégamment','Discrètement','Joyeusement','Subtilement','Audacieusement',
+    'Doucement','Curieusement','Triomphalement','Calmement','Facétieusement',
+    'Fièrement','Tendrement','Lentement','Délicatement','Brillamment'
+  ];
+  const VERBS = [
+    'Perché','Plongé','Flottant','Échappé','Câliné',
+    'Endormi','Bavard','Rêveur','Rieur','Migrant',
+    'Dansant','Couronné','Voyageur','Étoilé','Serein'
+  ];
+  function makePseudo(){
+    const a = ADJECTIVES[Math.floor(Math.random()*ADJECTIVES.length)];
+    const v = VERBS[Math.floor(Math.random()*VERBS.length)];
+    return `Canard${a}${v}`;
+  }
+
+  const duckHost = document.getElementById('duck-main');
+  const pseudoEl = document.getElementById('pseudo');
+  const rerollBtn = document.getElementById('reroll');
+
+  function setPseudo(text){
+    pseudoEl.textContent = text;
+    pseudoEl.classList.remove('long','xlong');
+    if (text.length > 22) pseudoEl.classList.add('xlong');
+    else if (text.length > 18) pseudoEl.classList.add('long');
+  }
+  function reroll(){
+    const v = pickVariant();
+    duckHost.innerHTML = renderDuck(v, 140);
+    setPseudo(makePseudo());
+  }
+  reroll();
+  // Known starter pseudo for the mock
+  setPseudo('CanardÉlégammentPerché');
+
+  rerollBtn.addEventListener('click', reroll);
+</script>
+
+</body>
+</html>

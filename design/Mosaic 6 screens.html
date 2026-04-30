@@ -1,0 +1,1315 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>The Pond — Mosaïque · 6 écrans (galerie & orchestration)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pond-deep:#0E4F6B; --pond-deeper:#062E40; --pond-mid:#3E8AA8;
+    --pond-light:#A9D8E5; --pond-pale:#E6F3F8;
+    --cream:#FAF3E3; --cream-deep:#F2E8CF; --cream-line:#EADFB8;
+    --duck:#FFC93C; --duck-deep:#F2B400;
+    --champagne:#E8C77A; --champagne-pale:#F6EAC4; --champagne-deep:#C9A347;
+    --coral-soft:#F8D9CF; --coral-deep:#B85A3F; --coral-line:#EDB7A4;
+    --green:#5BA85B;
+    --ink:#1F2933; --ink-soft:#5A6B7A;
+    --display:"Caprasimo","Cooper Black",Georgia,serif;
+    --sans:"DM Sans",-apple-system,system-ui,sans-serif;
+    --mono:"DM Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0; background:#181818}
+  body{
+    font-family:var(--sans); color:var(--ink);
+    min-height:100vh;
+    padding:48px 24px;
+    background:
+      radial-gradient(800px 500px at 20% 0%, #232b30 0%, transparent 60%),
+      radial-gradient(700px 500px at 90% 100%, #1f2a31 0%, transparent 60%),
+      #181818;
+  }
+
+  .canvas-meta{
+    max-width:1960px; margin:0 auto 28px;
+    color:#cfc7b5;
+  }
+  .canvas-meta h1{
+    font-family:var(--display); font-size:34px; margin:0; color:#FAF3E3;
+  }
+  .canvas-meta p{
+    margin:4px 0 0;
+    font-family:var(--mono); font-size:12px; color:#8a8275; letter-spacing:.04em;
+  }
+
+  .mosaic{
+    max-width:1960px; margin:0 auto;
+    display:grid;
+    grid-template-columns: repeat(6, 290px);
+    gap:24px;
+    justify-content:center;
+  }
+  .col{ display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .col-label{
+    font-family:var(--mono); font-size:10px; letter-spacing:.16em;
+    color:#cfc7b5; text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .col-label .num{ color:#7d7461; margin-right:6px; }
+
+  /* phone shell */
+  .phone{
+    width:290px;
+    background:var(--cream);
+    border-radius:28px;
+    overflow:hidden;
+    box-shadow:0 24px 60px -16px rgba(0,0,0,.6), 0 0 0 6px #111, 0 0 0 7px #2a2a2a;
+    position:relative;
+    background-image:
+      radial-gradient(360px 260px at 0% 0%, rgba(169,216,229,.4), transparent 60%),
+      radial-gradient(320px 240px at 100% 0%, rgba(255,201,60,.16), transparent 60%);
+  }
+  .phone.night{
+    background-image:
+      radial-gradient(380px 320px at 0% 0%, rgba(62,138,168,.35), transparent 60%),
+      radial-gradient(340px 280px at 100% 100%, rgba(14,79,107,.25), transparent 60%),
+      linear-gradient(180deg, var(--cream) 0%, #efe4ca 100%);
+  }
+  .phone.celebrate{
+    background-image:
+      radial-gradient(360px 280px at 0% 0%, rgba(255,201,60,.32), transparent 60%),
+      radial-gradient(340px 280px at 100% 0%, rgba(232,199,122,.32), transparent 60%);
+  }
+
+  .status-bar{
+    height:34px; padding:11px 18px 0;
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:var(--sans); font-weight:600; font-size:12px; color:var(--ink);
+  }
+  .status-bar .icons{display:flex; gap:5px; align-items:center;}
+
+  .home-ind{
+    height:14px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .home-ind::after{ content:""; width:90px; height:4px; border-radius:2px; background:rgba(31,41,51,.45); }
+
+  /* shared chrome */
+  .header-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 16px 4px;
+  }
+  .brand{
+    font-family:var(--sans); font-weight:700; font-size:14px;
+    color:var(--pond-deep);
+  }
+  .brand .y{ color:var(--duck-deep); }
+  .pill{
+    font-family:var(--mono); font-size:10px; font-weight:500;
+    padding:5px 9px; border-radius:999px;
+    background:var(--cream-deep);
+    color:var(--pond-deep);
+    border:1px solid var(--cream-line);
+    letter-spacing:.02em;
+    display:inline-flex; align-items:center; gap:4px;
+    white-space:nowrap;
+  }
+  .pill.shield{
+    background:rgba(62,138,168,.12);
+    border-color:rgba(62,138,168,.45);
+    color:var(--pond-deep);
+  }
+  .pill.shield svg{ color:var(--pond-mid); }
+  .pill.full{
+    background:var(--duck); color:var(--ink);
+    border-color:var(--duck-deep);
+  }
+
+  .sub-section{
+    padding:6px 16px 6px;
+  }
+  .sub-section h2{
+    margin:0;
+    font-family:var(--display); font-size:22px; line-height:1.05; color:var(--pond-deep);
+  }
+  .sub-section p{
+    margin:4px 0 0;
+    font-family:var(--sans); font-size:12px; color:var(--ink-soft);
+    line-height:1.35;
+  }
+
+  .back-link{
+    padding:8px 16px;
+    font-family:var(--sans); font-size:12px; color:var(--pond-mid);
+    display:inline-flex; align-items:center; gap:4px;
+  }
+  .back-bottom{
+    padding:14px 16px 6px;
+  }
+
+  /* ======= STAGE (centered illustration zone) ======= */
+  .stage{
+    margin:8px 16px 0;
+    height:240px;
+    border-radius:20px;
+    background:linear-gradient(180deg, var(--pond-pale) 0%, #d6ecf3 100%);
+    border:1px solid rgba(169,216,229,.5);
+    position:relative;
+    overflow:hidden;
+  }
+  .stage.night{
+    background:linear-gradient(180deg, #c4d8e0 0%, #87a8b9 100%);
+  }
+  .stage .water{
+    position:absolute; bottom:0; left:0; right:0; height:60px;
+    background:linear-gradient(180deg, var(--pond-light) 0%, var(--pond-mid) 100%);
+  }
+  .stage.night .water{
+    background:linear-gradient(180deg, #6a90a4 0%, #2c4f63 100%);
+  }
+  .stage .lily-pad{
+    position:absolute; bottom:38px; left:50%; transform:translateX(-50%);
+    width:96px; height:14px;
+    background:#4FA86B; border-radius:50%;
+    opacity:.85;
+    box-shadow: -50px 14px 0 -2px rgba(79,168,107,.7), 56px 18px 0 -3px rgba(79,168,107,.6);
+  }
+  .stage .lily-pad::before{
+    content:""; position:absolute; top:-2px; left:50%; transform:translateX(-50%);
+    width:90px; height:5px; border-radius:50%;
+    background:rgba(255,255,255,.25);
+  }
+  .stage .duck-sleep{
+    position:absolute; left:50%; bottom:46px; transform:translateX(-50%);
+    z-index:2;
+    animation: breathe 3.6s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{ transform:translateX(-50%) scale(1); }
+    50%   { transform:translateX(-50%) scale(1.04); }
+  }
+  .stage .zzz{
+    position:absolute;
+    font-family:var(--display); color:var(--pond-mid); opacity:.55;
+  }
+  .stage .zzz.z1{ top:24%; left:60%; font-size:18px; transform:rotate(-8deg); }
+  .stage .zzz.z2{ top:14%; left:68%; font-size:14px; transform:rotate(-5deg); opacity:.4; }
+  .stage .zzz.z3{ top:6%;  left:74%; font-size:11px; transform:rotate(-3deg); opacity:.3; }
+  .stage .moon{
+    position:absolute; top:18px; right:24px;
+    width:34px; height:34px; border-radius:50%;
+    background: radial-gradient(circle at 30% 35%, #fff5d0 0 30%, var(--champagne) 32% 100%);
+    box-shadow: inset -4px -4px 6px rgba(201,163,71,.4);
+    z-index:1;
+  }
+  .stage .moon::before{
+    content:""; position:absolute; top:8px; right:6px;
+    width:14px; height:14px; border-radius:50%;
+    background:var(--champagne-pale);
+  }
+  .stage.night .moon{
+    background: radial-gradient(circle at 30% 35%, #f0eaca 0 35%, #d9c98a 36% 100%);
+    box-shadow: inset -3px -3px 5px rgba(120,90,30,.4), 0 0 22px rgba(255,245,200,.25);
+  }
+  .stage .stars{
+    position:absolute; top:0; left:0; right:0; height:60%;
+    pointer-events:none;
+  }
+  .stage .stars span{
+    position:absolute; width:2px; height:2px; border-radius:50%;
+    background:#fff; opacity:.6;
+  }
+
+  /* ======= INFO CARD ======= */
+  .info-card{
+    margin:10px 16px 0;
+    padding:12px 14px;
+    background:var(--cream-deep);
+    border:1px solid var(--cream-line);
+    border-radius:14px;
+  }
+  .info-card .body{
+    font-family:var(--sans); font-size:13px; color:var(--pond-deep);
+    line-height:1.4;
+    margin:0;
+  }
+  .info-card .meta{
+    margin-top:8px;
+    font-family:var(--mono); font-size:10px; color:var(--ink-soft);
+    letter-spacing:.04em;
+    display:flex; align-items:center; gap:6px;
+  }
+  .info-card .meta::before{
+    content:""; width:5px; height:5px; border-radius:50%;
+    background:var(--pond-mid); flex-shrink:0;
+  }
+
+  /* ======= REVEAL BANNER (state 2) ======= */
+  .reveal-banner{
+    margin:10px 14px 0;
+    padding:9px 11px;
+    display:flex; align-items:center; gap:9px;
+    background:linear-gradient(135deg, var(--champagne-pale) 0%, #fff6dc 100%);
+    border:1px solid var(--champagne);
+    border-radius:13px;
+    font-family:var(--sans); font-size:11px; color:var(--ink);
+    line-height:1.35;
+  }
+  .reveal-banner .moon-icon{
+    width:20px; height:20px; flex-shrink:0;
+    border-radius:50%;
+    background: radial-gradient(circle at 30% 35%, #fff5d0 0 30%, var(--champagne) 32% 100%);
+    box-shadow: inset -3px -3px 4px rgba(201,163,71,.4);
+    position:relative;
+  }
+  .reveal-banner .moon-icon::before{
+    content:""; position:absolute; top:5px; right:4px;
+    width:8px; height:8px; border-radius:50%;
+    background:var(--champagne-pale);
+  }
+  .reveal-banner b{ color:var(--champagne-deep); font-weight:600; }
+
+  /* ======= FILTER CHIPS ======= */
+  .filter-row{
+    margin:10px 14px 6px;
+    display:flex; gap:5px;
+    overflow-x:auto;
+    scrollbar-width:none;
+  }
+  .filter-row::-webkit-scrollbar{ display:none; }
+  .chip{
+    padding:4px 8px; border-radius:999px;
+    background:transparent;
+    color:var(--ink-soft);
+    border:1px solid var(--cream-line);
+    font-family:var(--mono); font-size:9px; font-weight:500;
+    text-transform:uppercase; letter-spacing:.04em;
+    display:inline-flex; align-items:center; gap:4px;
+    white-space:nowrap;
+  }
+  .chip.active{
+    background:var(--pond-deep);
+    color:#fff;
+    border-color:var(--pond-deep);
+  }
+  .chip svg{ width:9px; height:9px; }
+
+  /* sort row (state 4 only) */
+  .sort-row{
+    margin:0 14px 6px;
+    display:flex; align-items:center; justify-content:space-between;
+    font-family:var(--mono); font-size:9px; color:var(--ink-soft);
+    letter-spacing:.04em; text-transform:uppercase;
+  }
+  .sort-row .toggles{ display:flex; gap:4px; }
+  .sort-row .t-pill{
+    padding:3px 7px; border-radius:8px; border:1px solid var(--cream-line);
+  }
+  .sort-row .t-pill.active{
+    background:var(--cream-deep); color:var(--pond-deep); border-color:var(--cream-line);
+  }
+
+  /* ======= GRID MASONRY ======= */
+  .grid-mason{
+    margin:0 14px 14px;
+    column-count:2; column-gap:7px;
+  }
+  .card{
+    break-inside:avoid;
+    margin-bottom:7px;
+    border-radius:11px;
+    overflow:hidden;
+    background:var(--cream-deep);
+    border:1px solid var(--cream-line);
+    box-shadow:0 4px 10px -6px rgba(14,79,107,.18);
+    position:relative;
+  }
+  .card.couple{
+    border:2px solid var(--champagne);
+    box-shadow:0 4px 14px -6px rgba(201,163,71,.5);
+  }
+  .card-media{
+    background:#C8CCD0;
+    width:100%;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff;
+    position:relative;
+  }
+  .card-media.h-s{ height:80px; }
+  .card-media.h-m{ height:120px; }
+  .card-media.h-l{ height:150px; }
+  .card-media.video{
+    background: linear-gradient(135deg,#3a4148,#5a6168);
+  }
+  .card-media.video .play-circle{
+    width:26px; height:26px; border-radius:50%;
+    background:rgba(255,255,255,.85);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .card-media .ts{
+    position:absolute; bottom:5px; right:5px;
+    font-family:var(--mono); font-size:8px; color:#fff;
+    background:rgba(0,0,0,.55);
+    padding:2px 5px; border-radius:4px;
+    letter-spacing:.04em;
+  }
+  .card-vocal{
+    background:linear-gradient(180deg, var(--pond-pale), #d6ecf3);
+    height:140px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:6px;
+    position:relative;
+  }
+  .card-vocal .wf{
+    display:flex; align-items:center; gap:1.5px; height:42px; padding:0 10px;
+  }
+  .card-vocal .wf span{
+    width:2.5px; background:var(--pond-mid); border-radius:2px;
+    flex-shrink:0;
+  }
+  .card-vocal .icon-mic{
+    width:20px; height:20px; border-radius:50%;
+    background:var(--pond-deep);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff;
+    position:absolute; top:6px; right:6px;
+  }
+  .card-vocal .ts-vocal{
+    font-family:var(--mono); font-size:9px; color:var(--pond-deep); letter-spacing:.04em;
+  }
+  .card-foot{
+    padding:5px 7px;
+    display:flex; align-items:center; gap:5px;
+    background:var(--cream);
+  }
+  .card-foot .av{
+    width:16px; height:16px; flex-shrink:0;
+    border-radius:50%;
+    background:var(--duck);
+    border:1.2px solid var(--pond-deep);
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .card-foot .av.white{ background:#EADFB8; }
+  .card-foot .av.blue{ background:#7AB8D9; }
+  .card-foot .meta{
+    font-family:var(--mono); font-size:8px; color:var(--ink-soft);
+    letter-spacing:.02em;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .card-foot .meta b{ color:var(--ink); font-weight:500; }
+
+  .scroll-hint{
+    text-align:center;
+    padding:6px 16px 8px;
+    font-family:var(--mono); font-size:9px; color:var(--ink-soft);
+    letter-spacing:.06em;
+  }
+
+  /* ======= ORCHESTRATION ======= */
+  .o-welcome{
+    padding:8px 16px 4px;
+  }
+  .o-welcome h2{
+    margin:0;
+    font-family:var(--display); font-size:20px; color:var(--pond-deep);
+  }
+  .o-welcome p{
+    margin:2px 0 0;
+    font-family:var(--mono); font-size:9px; color:var(--ink-soft);
+    letter-spacing:.04em; text-transform:uppercase;
+  }
+  .o-state{
+    margin:10px 14px 0;
+    padding:10px 12px;
+    background:var(--pond-pale);
+    border:1px solid rgba(62,138,168,.25);
+    border-radius:12px;
+    font-family:var(--mono); font-size:10px; color:var(--pond-deep);
+    line-height:1.5;
+    letter-spacing:.02em;
+    display:flex; align-items:center; gap:10px;
+  }
+  .o-state .num{
+    font-family:var(--display); font-size:16px; color:var(--pond-deep);
+  }
+  .o-state .seg{ display:flex; flex-direction:column; align-items:center; }
+  .o-state .seg .lab{ font-size:8px; letter-spacing:.06em; color:var(--ink-soft); text-transform:uppercase; }
+  .o-state .div{ width:1px; height:22px; background:rgba(62,138,168,.25); }
+
+  .o-section-title{
+    margin:14px 16px 6px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .o-section-title h3{
+    margin:0;
+    font-family:var(--display); font-size:16px; color:var(--pond-deep);
+  }
+  .o-section-title .hint{
+    font-family:var(--mono); font-size:9px; color:var(--ink-soft);
+    letter-spacing:.04em; text-transform:uppercase;
+  }
+
+  .palier-list{
+    margin:0 14px;
+    background:var(--cream);
+    border:1px solid var(--cream-line);
+    border-radius:14px;
+    overflow:hidden;
+  }
+  .palier{
+    display:flex; align-items:center; gap:8px;
+    padding:9px 10px;
+    border-bottom:1px solid var(--cream-line);
+  }
+  .palier:last-child{ border-bottom:none; }
+  .palier .handle{
+    flex-shrink:0; color:#bdb29a;
+    cursor:grab;
+  }
+  .palier .stat-icon{
+    width:18px; height:18px; flex-shrink:0;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .palier .stat-icon.done{ background:var(--green); color:#fff; }
+  .palier .stat-icon.live{
+    background:var(--duck); color:var(--ink);
+    box-shadow:0 0 0 3px rgba(255,201,60,.35);
+    animation: pulse-live 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse-live{
+    0%,100%{ box-shadow:0 0 0 3px rgba(255,201,60,.35); }
+    50%   { box-shadow:0 0 0 6px rgba(255,201,60,.0); }
+  }
+  .palier .stat-icon.locked{
+    background:var(--cream-deep);
+    color:var(--ink-soft);
+    border:1px solid var(--cream-line);
+  }
+  .palier .name{
+    flex:1; min-width:0;
+    font-family:var(--sans); font-size:12px; font-weight:600; color:var(--ink);
+    line-height:1.2;
+    display:flex; align-items:center; gap:5px;
+  }
+  .palier.faded .name{ color:var(--ink-soft); }
+  .palier .name .edit{
+    width:11px; height:11px; color:var(--ink-soft); opacity:.45;
+    flex-shrink:0;
+  }
+  .palier .when{
+    font-family:var(--mono); font-size:9px; color:var(--ink-soft);
+    letter-spacing:.04em;
+    flex-shrink:0;
+  }
+  .palier.live .when{ color:var(--duck-deep); font-weight:500; }
+  .palier .stat{
+    font-family:var(--mono); font-size:8px; letter-spacing:.04em;
+    color:var(--ink-soft); text-transform:uppercase;
+    min-width:42px; text-align:right;
+    flex-shrink:0;
+  }
+  .palier.faded .stat{ color:var(--green); }
+  .palier.live .stat{ color:var(--duck-deep); font-weight:500; }
+
+  .add-palier{
+    margin:8px 14px 0;
+    padding:8px 10px;
+    border:1px dashed var(--cream-line);
+    border-radius:10px;
+    text-align:center;
+    font-family:var(--sans); font-size:11px; color:var(--pond-mid); font-weight:500;
+    display:flex; align-items:center; justify-content:center; gap:5px;
+  }
+
+  .o-cta{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    width:calc(100% - 28px); margin:12px 14px 8px;
+    height:48px;
+    background:var(--duck); color:var(--ink);
+    font-family:var(--sans); font-weight:700; font-size:12px; letter-spacing:.04em;
+    border:none; border-radius:14px; cursor:pointer;
+    box-shadow: 0 3px 0 var(--duck-deep), 0 8px 18px -8px rgba(242,180,0,.5);
+  }
+
+  .o-toggle{
+    margin:0 14px 6px;
+    padding:9px 11px;
+    background:var(--cream);
+    border:1px solid var(--cream-line);
+    border-radius:12px;
+  }
+  .o-toggle-row{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+  }
+  .o-toggle-row .lbl{
+    font-family:var(--sans); font-weight:600; font-size:12px; color:var(--ink);
+  }
+  .o-toggle-desc{
+    margin-top:2px;
+    font-family:var(--mono); font-size:9px; color:var(--ink-soft);
+    line-height:1.35;
+  }
+  .switch{
+    width:32px; height:18px; flex-shrink:0;
+    border-radius:999px;
+    background:#cfd2d6;
+    position:relative;
+  }
+  .switch::after{
+    content:""; position:absolute; top:2px; left:2px;
+    width:14px; height:14px; border-radius:50%;
+    background:#fff;
+    box-shadow:0 1px 3px rgba(0,0,0,.25);
+  }
+  .switch.on{ background:var(--pond-deep); }
+  .switch.on::after{ left:16px; }
+
+  .o-actions{
+    margin:14px 14px 0;
+    padding-top:10px;
+    border-top:1px solid var(--cream-line);
+  }
+  .o-actions h3{
+    margin:0 0 8px;
+    font-family:var(--sans); font-weight:600; font-size:12px; color:var(--pond-deep);
+    letter-spacing:.02em;
+  }
+  .o-export{
+    width:100%;
+    padding:10px 12px;
+    background:var(--cream);
+    border:1px solid var(--cream-line);
+    color:var(--ink);
+    font-family:var(--sans); font-size:12px; font-weight:500;
+    border-radius:11px;
+    display:flex; align-items:center; gap:8px;
+    cursor:pointer;
+  }
+  .o-export svg{ color:var(--pond-mid); flex-shrink:0; }
+  .o-export .sub{
+    margin-left:auto;
+    font-family:var(--mono); font-size:9px; color:var(--ink-soft);
+    letter-spacing:.04em;
+  }
+
+  /* ======= MARE TV INSTRUCTIONS (Screen 6) ======= */
+  .tv-stage{
+    margin:10px 16px 4px;
+    height:170px;
+    border-radius:18px;
+    background:linear-gradient(180deg, var(--pond-pale) 0%, #d6ecf3 100%);
+    border:1px solid rgba(169,216,229,.55);
+    position:relative; overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .tv-set{
+    position:relative;
+    width:130px; height:88px;
+    background:linear-gradient(180deg, #1a3a4a, #0a2230);
+    border-radius:8px;
+    border:3px solid var(--pond-deep);
+    box-shadow:0 6px 14px -4px rgba(14,79,107,.4);
+  }
+  .tv-set::before{
+    /* screen glow */
+    content:""; position:absolute; inset:6px;
+    border-radius:4px;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,201,60,.4) 0 22%, transparent 60%),
+      linear-gradient(180deg, #1f5c79, #0a2a3d);
+  }
+  .tv-set::after{
+    /* stand */
+    content:""; position:absolute; bottom:-14px; left:50%; transform:translateX(-50%);
+    width:46px; height:6px;
+    background:var(--pond-deep); border-radius:0 0 6px 6px;
+  }
+  .tv-base{
+    position:absolute; bottom:18px; left:50%; transform:translateX(-50%);
+    width:80px; height:5px;
+    background:#5A6B7A; border-radius:2px;
+  }
+  .tv-duck{
+    position:absolute; top:14px; left:50%; transform:translateX(-50%);
+    z-index:2;
+  }
+  .tv-stage .live{
+    position:absolute; top:14px; right:14px;
+    display:inline-flex; align-items:center; gap:4px;
+    font-family:var(--mono); font-size:9px; font-weight:500;
+    color:#fff; background:rgba(0,0,0,.5);
+    padding:3px 7px; border-radius:6px;
+    letter-spacing:.06em; text-transform:uppercase;
+  }
+  .tv-stage .live::before{
+    content:""; width:5px; height:5px; border-radius:50%; background:#E14B3F;
+    box-shadow:0 0 0 2px rgba(225,75,63,.3);
+  }
+
+  .explain{
+    margin:8px 14px 0;
+    padding:11px 13px;
+    background:var(--cream-deep);
+    border:1px solid var(--cream-line);
+    border-radius:13px;
+  }
+  .explain .num-tag{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:18px; height:18px; border-radius:50%;
+    background:var(--pond-deep); color:#fff;
+    font-family:var(--mono); font-weight:500; font-size:10px;
+    margin-right:8px;
+    flex-shrink:0;
+  }
+  .explain .head{
+    display:flex; align-items:center;
+    margin-bottom:6px;
+  }
+  .explain .head h4{
+    margin:0;
+    font-family:var(--sans); font-weight:600; font-size:13px; color:var(--ink);
+  }
+  .explain .body{
+    margin:0;
+    font-family:var(--sans); font-size:12px; color:var(--ink-soft);
+    line-height:1.4;
+  }
+  .qr-wrap{
+    margin:10px auto 0;
+    width:100px; height:100px;
+    background:#fff;
+    border:1px solid var(--cream-line);
+    border-radius:8px;
+    padding:6px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .qr-pattern{
+    width:100%; height:100%;
+    background-image:
+      linear-gradient(45deg, var(--ink) 25%, transparent 25%),
+      linear-gradient(-45deg, var(--ink) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, var(--ink) 75%),
+      linear-gradient(-45deg, transparent 75%, var(--ink) 75%);
+    background-size: 8px 8px;
+    background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+    background-color:#fff;
+    border-radius:3px;
+    position:relative;
+  }
+  .qr-pattern::before, .qr-pattern::after{
+    content:""; position:absolute;
+    width:18px; height:18px;
+    background:#fff;
+    border:3px solid var(--ink);
+  }
+  .qr-pattern::before{ top:0; left:0; }
+  .qr-pattern::after{ top:0; right:0; }
+  .qr-corner{
+    position:absolute; bottom:0; left:0;
+    width:18px; height:18px;
+    background:#fff;
+    border:3px solid var(--ink);
+  }
+
+  .ico{ display:inline-flex; align-items:center; justify-content:center; }
+</style>
+</head>
+<body>
+
+<!-- duck symbol library -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="duck-glyph" viewBox="0 0 64 50">
+      <ellipse cx="32" cy="44" rx="26" ry="3.5" fill="#1F2933" opacity=".12"/>
+      <ellipse cx="30" cy="32" rx="24" ry="11" fill="var(--body, #FFC93C)"/>
+      <ellipse cx="26" cy="35" rx="16" ry="5" fill="var(--belly, #FFE08A)" opacity=".7"/>
+      <path d="M52 28 Q60 24 58 32 Q54 32 52 30 Z" fill="var(--shade, #F2B400)"/>
+      <circle cx="46" cy="20" r="11" fill="var(--body, #FFC93C)"/>
+      <path d="M55 19 L62 22 L55 25 Z" fill="#F2B400"/>
+      <path d="M55 21 L60 22.5 L55 24 Z" fill="#C9881A" opacity=".5"/>
+      <circle cx="49" cy="17" r="2.2" fill="#1F2933"/>
+      <circle cx="49.7" cy="16.4" r=".7" fill="#FAF3E3"/>
+      <path d="M28 26 Q34 22 40 28 Q36 32 28 30 Z" fill="var(--shade, #F2B400)"/>
+    </symbol>
+    <!-- closed-eye sleeping duck variant -->
+    <symbol id="duck-asleep" viewBox="0 0 64 50">
+      <ellipse cx="32" cy="44" rx="26" ry="3.5" fill="#1F2933" opacity=".12"/>
+      <ellipse cx="30" cy="32" rx="24" ry="11" fill="var(--body, #FFC93C)"/>
+      <ellipse cx="26" cy="35" rx="16" ry="5" fill="var(--belly, #FFE08A)" opacity=".7"/>
+      <path d="M52 28 Q60 24 58 32 Q54 32 52 30 Z" fill="var(--shade, #F2B400)"/>
+      <circle cx="46" cy="22" r="10" fill="var(--body, #FFC93C)"/>
+      <path d="M55 21 L62 23.5 L55 26 Z" fill="#F2B400"/>
+      <!-- closed eye = curved line -->
+      <path d="M44 19 Q47 17 50 19" stroke="#1F2933" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+      <path d="M28 26 Q34 22 40 28 Q36 32 28 30 Z" fill="var(--shade, #F2B400)"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="canvas-meta">
+  <h1>Mosaïque · 6 écrans (galerie & orchestration)</h1>
+  <p>Brouillon de structure · mobile 290px · 4 états de la galerie + orchestration témoins + Mare TV pairing</p>
+</div>
+
+<div class="mosaic">
+
+  <!-- =========================================
+       01 — GALERIE · MARE ENDORMIE
+       ========================================= -->
+  <div class="col">
+    <div class="col-label"><span class="num">01</span>GALERIE · MARE ENDORMIE</div>
+    <div class="phone">
+      <div class="status-bar">
+        <span>19:32</span>
+        <div class="icons">
+          <svg width="13" height="8" viewBox="0 0 18 11"><rect x="1" y="6" width="3" height="4" rx=".5" fill="#1F2933"/><rect x="6" y="4" width="3" height="6" rx=".5" fill="#1F2933"/><rect x="11" y="2" width="3" height="8" rx=".5" fill="#1F2933"/></svg>
+          <svg width="20" height="9" viewBox="0 0 26 12"><rect x="1" y="1" width="22" height="10" rx="3" stroke="#1F2933" fill="none"/><rect x="3" y="3" width="14" height="6" rx="1.5" fill="#1F2933"/><rect x="24" y="4" width="1.5" height="4" rx=".5" fill="#1F2933"/></svg>
+        </div>
+      </div>
+      <div class="header-row">
+        <div class="brand">The <span class="y">Pond</span>.</div>
+        <div class="pill">12 / 52 canards</div>
+      </div>
+      <div class="sub-section">
+        <h2>La mare</h2>
+        <p>Souvenirs en attente de révélation</p>
+      </div>
+      <div class="stage">
+        <div class="lily-pad"></div>
+        <div class="duck-sleep">
+          <svg width="100" height="78" viewBox="0 0 64 50"><use href="#duck-asleep"/></svg>
+        </div>
+        <div class="zzz z1">z</div>
+        <div class="zzz z2">z</div>
+        <div class="zzz z3">z</div>
+        <div class="water"></div>
+      </div>
+      <div class="info-card">
+        <p class="body">Les premiers barbotages se révèleront avec le dîner vers <b style="color:var(--pond-deep)">20h30</b></p>
+        <div class="meta">12 souvenirs barbotent dans la mare</div>
+      </div>
+      <div class="back-bottom">
+        <span class="back-link" style="padding:0">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 6 9 12 15 18"/></svg>
+          Retour
+        </span>
+      </div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+
+  <!-- =========================================
+       02 — GALERIE · MARE RÉVEILLÉE
+       ========================================= -->
+  <div class="col">
+    <div class="col-label"><span class="num">02</span>GALERIE · MARE RÉVEILLÉE</div>
+    <div class="phone">
+      <div class="status-bar">
+        <span>22:12</span>
+        <div class="icons">
+          <svg width="13" height="8" viewBox="0 0 18 11"><rect x="1" y="6" width="3" height="4" rx=".5" fill="#1F2933"/><rect x="6" y="4" width="3" height="6" rx=".5" fill="#1F2933"/><rect x="11" y="2" width="3" height="8" rx=".5" fill="#1F2933"/></svg>
+          <svg width="20" height="9" viewBox="0 0 26 12"><rect x="1" y="1" width="22" height="10" rx="3" stroke="#1F2933" fill="none"/><rect x="3" y="3" width="14" height="6" rx="1.5" fill="#1F2933"/><rect x="24" y="4" width="1.5" height="4" rx=".5" fill="#1F2933"/></svg>
+        </div>
+      </div>
+      <div class="header-row">
+        <div class="brand">The <span class="y">Pond</span>.</div>
+        <div class="pill">32 / 52 canards</div>
+      </div>
+      <div class="sub-section">
+        <h2>Le dîner vient<br/>d'arriver</h2>
+        <p>18 souvenirs · révélés à 21h47</p>
+      </div>
+      <div class="reveal-banner">
+        <div class="moon-icon"></div>
+        <div>Les souvenirs du <b>dessert</b> se révèleront avec le café vers 23h</div>
+      </div>
+      <div class="filter-row">
+        <span class="chip active">Tout · 12</span>
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="3"/></svg>
+          8
+        </span>
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M22 8 L16 12 L22 16 Z"/></svg>
+          3
+        </span>
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/></svg>
+          1
+        </span>
+      </div>
+      <div class="grid-mason">
+        <div class="card couple">
+          <div class="card-media h-m">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+          </div>
+          <div class="card-foot">
+            <div class="av white"><svg width="11" height="9" viewBox="0 0 64 50" style="--body:#EADFB8; --belly:#F5EBC9; --shade:#C9B988"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Marie & Sarah</b> · 22h05</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-media h-s">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="3"/></svg>
+          </div>
+          <div class="card-foot">
+            <div class="av"><svg width="11" height="9" viewBox="0 0 64 50"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Léa</b> · 21h47</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-vocal">
+            <div class="icon-mic"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="22"/></svg></div>
+            <div class="wf">
+              <span style="height:10px"></span><span style="height:18px"></span><span style="height:26px"></span><span style="height:14px"></span>
+              <span style="height:32px"></span><span style="height:36px"></span><span style="height:22px"></span><span style="height:12px"></span>
+              <span style="height:24px"></span><span style="height:34px"></span><span style="height:26px"></span><span style="height:14px"></span>
+              <span style="height:20px"></span><span style="height:28px"></span><span style="height:10px"></span>
+            </div>
+            <div class="ts-vocal">0:42</div>
+          </div>
+          <div class="card-foot">
+            <div class="av blue"><svg width="11" height="9" viewBox="0 0 64 50" style="--body:#7AB8D9; --belly:#A9D8E5; --shade:#4E91B5"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Tonton Jean</b> · 21h32</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-media video h-m">
+            <div class="play-circle"><svg width="11" height="11" viewBox="0 0 24 24" fill="#1F2933"><polygon points="6,4 20,12 6,20"/></svg></div>
+            <div class="ts">0:14</div>
+          </div>
+          <div class="card-foot">
+            <div class="av"><svg width="11" height="9" viewBox="0 0 64 50"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Marc</b> · 21h28</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-media h-m">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="3"/></svg>
+          </div>
+          <div class="card-foot">
+            <div class="av white"><svg width="11" height="9" viewBox="0 0 64 50" style="--body:#EADFB8; --belly:#F5EBC9; --shade:#C9B988"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Camille</b> · 21h19</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-media h-s">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="3"/></svg>
+          </div>
+          <div class="card-foot">
+            <div class="av"><svg width="11" height="9" viewBox="0 0 64 50"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Romain</b> · 21h11</div>
+          </div>
+        </div>
+      </div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+
+  <!-- =========================================
+       03 — GALERIE · MARE NOCTURNE
+       ========================================= -->
+  <div class="col">
+    <div class="col-label"><span class="num">03</span>GALERIE · MARE NOCTURNE</div>
+    <div class="phone night">
+      <div class="status-bar">
+        <span>01:23</span>
+        <div class="icons">
+          <svg width="13" height="8" viewBox="0 0 18 11"><rect x="1" y="6" width="3" height="4" rx=".5" fill="#1F2933"/><rect x="6" y="4" width="3" height="6" rx=".5" fill="#1F2933"/><rect x="11" y="2" width="3" height="8" rx=".5" fill="#1F2933"/></svg>
+          <svg width="20" height="9" viewBox="0 0 26 12"><rect x="1" y="1" width="22" height="10" rx="3" stroke="#1F2933" fill="none"/><rect x="3" y="3" width="14" height="6" rx="1.5" fill="#1F2933"/><rect x="24" y="4" width="1.5" height="4" rx=".5" fill="#1F2933"/></svg>
+        </div>
+      </div>
+      <div class="header-row">
+        <div class="brand">The <span class="y">Pond</span>.</div>
+        <div class="pill">47 / 52 canards</div>
+      </div>
+      <div class="sub-section">
+        <h2>La mare</h2>
+        <p>01h23 · la mare se ferme</p>
+      </div>
+      <div class="stage night">
+        <div class="moon"></div>
+        <div class="stars">
+          <span style="top:20%; left:18%"></span>
+          <span style="top:14%; left:32%; opacity:.4"></span>
+          <span style="top:30%; left:48%"></span>
+          <span style="top:18%; left:62%; opacity:.5"></span>
+          <span style="top:36%; left:78%"></span>
+          <span style="top:46%; left:22%; opacity:.4"></span>
+        </div>
+        <div class="duck-sleep">
+          <svg width="100" height="78" viewBox="0 0 64 50" style="--body:#E2B12A; --belly:#FFD667; --shade:#B88800"><use href="#duck-asleep"/></svg>
+        </div>
+        <div class="zzz z1" style="color:#3E8AA8; opacity:.7">z</div>
+        <div class="zzz z2" style="color:#3E8AA8; opacity:.5">z</div>
+        <div class="zzz z3" style="color:#3E8AA8; opacity:.35">z</div>
+        <div class="water"></div>
+      </div>
+      <div class="info-card">
+        <p class="body">Plus assez de lumière aujourd'hui · on y verra mieux demain pour les autres barbotages</p>
+        <div class="meta">Les canards seront confits demain vers 11h</div>
+      </div>
+      <div class="back-bottom">
+        <span class="back-link" style="padding:0">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 6 9 12 15 18"/></svg>
+          Retour
+        </span>
+      </div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+
+  <!-- =========================================
+       04 — GALERIE · CANARDS CONFITS
+       ========================================= -->
+  <div class="col">
+    <div class="col-label"><span class="num">04</span>GALERIE · CANARDS CONFITS</div>
+    <div class="phone celebrate">
+      <div class="status-bar">
+        <span>11:14</span>
+        <div class="icons">
+          <svg width="13" height="8" viewBox="0 0 18 11"><rect x="1" y="6" width="3" height="4" rx=".5" fill="#1F2933"/><rect x="6" y="4" width="3" height="6" rx=".5" fill="#1F2933"/><rect x="11" y="2" width="3" height="8" rx=".5" fill="#1F2933"/></svg>
+          <svg width="20" height="9" viewBox="0 0 26 12"><rect x="1" y="1" width="22" height="10" rx="3" stroke="#1F2933" fill="none"/><rect x="3" y="3" width="14" height="6" rx="1.5" fill="#1F2933"/><rect x="24" y="4" width="1.5" height="4" rx=".5" fill="#1F2933"/></svg>
+        </div>
+      </div>
+      <div class="header-row">
+        <div class="brand">The <span class="y">Pond</span>.</div>
+        <div class="pill full">52 / 52 canards</div>
+      </div>
+      <div class="sub-section">
+        <h2>Les canards<br/>sont confits</h2>
+        <p>47 souvenirs · dégustons maintenant…</p>
+      </div>
+      <div class="filter-row">
+        <span class="chip active">Tout · 47</span>
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="3"/></svg>
+          28
+        </span>
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M22 8 L16 12 L22 16 Z"/></svg>
+          12
+        </span>
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/></svg>
+          7
+        </span>
+      </div>
+      <div class="sort-row">
+        <span>Tri</span>
+        <div class="toggles">
+          <span class="t-pill active">Chrono</span>
+          <span class="t-pill">Aléatoire</span>
+        </div>
+      </div>
+      <div class="grid-mason">
+        <div class="card couple">
+          <div class="card-media h-l">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+          </div>
+          <div class="card-foot">
+            <div class="av white"><svg width="11" height="9" viewBox="0 0 64 50" style="--body:#EADFB8; --belly:#F5EBC9; --shade:#C9B988"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Marie & Sarah</b> · 23h12</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-media h-s">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="3"/></svg>
+          </div>
+          <div class="card-foot">
+            <div class="av"><svg width="11" height="9" viewBox="0 0 64 50"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Léa</b> · 22h47</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-media video h-m">
+            <div class="play-circle"><svg width="11" height="11" viewBox="0 0 24 24" fill="#1F2933"><polygon points="6,4 20,12 6,20"/></svg></div>
+            <div class="ts">0:08</div>
+          </div>
+          <div class="card-foot">
+            <div class="av"><svg width="11" height="9" viewBox="0 0 64 50"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Sophie</b> · 22h32</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-vocal" style="height:120px">
+            <div class="icon-mic"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/></svg></div>
+            <div class="wf">
+              <span style="height:10px"></span><span style="height:20px"></span><span style="height:14px"></span>
+              <span style="height:28px"></span><span style="height:32px"></span><span style="height:18px"></span>
+              <span style="height:24px"></span><span style="height:30px"></span><span style="height:14px"></span>
+              <span style="height:20px"></span><span style="height:8px"></span>
+            </div>
+            <div class="ts-vocal">0:23</div>
+          </div>
+          <div class="card-foot">
+            <div class="av blue"><svg width="11" height="9" viewBox="0 0 64 50" style="--body:#7AB8D9; --belly:#A9D8E5; --shade:#4E91B5"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Tonton Jean</b> · 22h05</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-media h-m">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="3"/></svg>
+          </div>
+          <div class="card-foot">
+            <div class="av"><svg width="11" height="9" viewBox="0 0 64 50"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Marc</b> · 21h32</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-media h-s">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="3"/></svg>
+          </div>
+          <div class="card-foot">
+            <div class="av white"><svg width="11" height="9" viewBox="0 0 64 50" style="--body:#EADFB8; --belly:#F5EBC9; --shade:#C9B988"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Camille</b> · 21h28</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-media video h-s">
+            <div class="play-circle"><svg width="11" height="11" viewBox="0 0 24 24" fill="#1F2933"><polygon points="6,4 20,12 6,20"/></svg></div>
+            <div class="ts">0:11</div>
+          </div>
+          <div class="card-foot">
+            <div class="av"><svg width="11" height="9" viewBox="0 0 64 50"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Hugo</b> · 21h14</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-media h-m">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 4h-5l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4z"/><circle cx="12" cy="13" r="3"/></svg>
+          </div>
+          <div class="card-foot">
+            <div class="av"><svg width="11" height="9" viewBox="0 0 64 50"><use href="#duck-glyph"/></svg></div>
+            <div class="meta"><b>Romain</b> · 21h02</div>
+          </div>
+        </div>
+      </div>
+      <div class="scroll-hint">↓ continue à scroller pour découvrir les 47 souvenirs</div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+
+  <!-- =========================================
+       05 — ORCHESTRATION · TÉMOINS
+       ========================================= -->
+  <div class="col">
+    <div class="col-label"><span class="num">05</span>ORCHESTRATION · TÉMOINS</div>
+    <div class="phone">
+      <div class="status-bar">
+        <span>22:48</span>
+        <div class="icons">
+          <svg width="13" height="8" viewBox="0 0 18 11"><rect x="1" y="6" width="3" height="4" rx=".5" fill="#1F2933"/><rect x="6" y="4" width="3" height="6" rx=".5" fill="#1F2933"/><rect x="11" y="2" width="3" height="8" rx=".5" fill="#1F2933"/></svg>
+          <svg width="20" height="9" viewBox="0 0 26 12"><rect x="1" y="1" width="22" height="10" rx="3" stroke="#1F2933" fill="none"/><rect x="3" y="3" width="14" height="6" rx="1.5" fill="#1F2933"/><rect x="24" y="4" width="1.5" height="4" rx=".5" fill="#1F2933"/></svg>
+        </div>
+      </div>
+      <div class="header-row">
+        <div class="brand">The <span class="y">Pond</span>.</div>
+        <div class="pill shield">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L4 5v7c0 5 3.5 9 8 10 4.5-1 8-5 8-10V5z"/></svg>
+          Orchestration
+        </div>
+      </div>
+      <div class="o-welcome">
+        <h2>Bonsoir Marc</h2>
+        <p>Témoin du marié · accès orchestration</p>
+      </div>
+
+      <div class="o-state">
+        <div class="seg"><span class="num">32</span><span class="lab">partagés</span></div>
+        <div class="div"></div>
+        <div class="seg"><span class="num">18</span><span class="lab">révélés</span></div>
+        <div class="div"></div>
+        <div class="seg"><span class="num">14</span><span class="lab">en attente</span></div>
+      </div>
+
+      <div class="o-section-title">
+        <h3>Paliers</h3>
+        <span class="hint">Glisser pour réordonner</span>
+      </div>
+      <div class="palier-list">
+        <div class="palier faded">
+          <span class="handle">
+            <svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor"><circle cx="2" cy="3" r="1"/><circle cx="8" cy="3" r="1"/><circle cx="2" cy="7" r="1"/><circle cx="8" cy="7" r="1"/><circle cx="2" cy="11" r="1"/><circle cx="8" cy="11" r="1"/></svg>
+          </span>
+          <span class="stat-icon done">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          <span class="name">Apéro
+            <svg class="edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3l5 5-12 12H4v-5z"/></svg>
+          </span>
+          <span class="when">19h00</span>
+          <span class="stat">révélé</span>
+        </div>
+        <div class="palier faded">
+          <span class="handle">
+            <svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor"><circle cx="2" cy="3" r="1"/><circle cx="8" cy="3" r="1"/><circle cx="2" cy="7" r="1"/><circle cx="8" cy="7" r="1"/><circle cx="2" cy="11" r="1"/><circle cx="8" cy="11" r="1"/></svg>
+          </span>
+          <span class="stat-icon done">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          <span class="name">Dîner
+            <svg class="edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3l5 5-12 12H4v-5z"/></svg>
+          </span>
+          <span class="when">20h30</span>
+          <span class="stat">révélé</span>
+        </div>
+        <div class="palier live">
+          <span class="handle">
+            <svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor"><circle cx="2" cy="3" r="1"/><circle cx="8" cy="3" r="1"/><circle cx="2" cy="7" r="1"/><circle cx="8" cy="7" r="1"/><circle cx="2" cy="11" r="1"/><circle cx="8" cy="11" r="1"/></svg>
+          </span>
+          <span class="stat-icon live"></span>
+          <span class="name">Dessert
+            <svg class="edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3l5 5-12 12H4v-5z"/></svg>
+          </span>
+          <span class="when">22h45</span>
+          <span class="stat">en cours</span>
+        </div>
+        <div class="palier">
+          <span class="handle">
+            <svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor"><circle cx="2" cy="3" r="1"/><circle cx="8" cy="3" r="1"/><circle cx="2" cy="7" r="1"/><circle cx="8" cy="7" r="1"/><circle cx="2" cy="11" r="1"/><circle cx="8" cy="11" r="1"/></svg>
+          </span>
+          <span class="stat-icon locked">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </span>
+          <span class="name">Café
+            <svg class="edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3l5 5-12 12H4v-5z"/></svg>
+          </span>
+          <span class="when">23h30</span>
+          <span class="stat">verrouillé</span>
+        </div>
+        <div class="palier">
+          <span class="handle">
+            <svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor"><circle cx="2" cy="3" r="1"/><circle cx="8" cy="3" r="1"/><circle cx="2" cy="7" r="1"/><circle cx="8" cy="7" r="1"/><circle cx="2" cy="11" r="1"/><circle cx="8" cy="11" r="1"/></svg>
+          </span>
+          <span class="stat-icon locked">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          </span>
+          <span class="name" style="font-size:11px">Le bilan du lendemain
+            <svg class="edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3l5 5-12 12H4v-5z"/></svg>
+          </span>
+          <span class="when">11h00</span>
+          <span class="stat">verr.</span>
+        </div>
+      </div>
+      <div class="add-palier">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Ajouter un palier
+      </div>
+
+      <button class="o-cta">
+        Passer au prochain palier
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+
+      <div class="o-section-title" style="margin-top:14px">
+        <h3>Paramètres</h3>
+      </div>
+      <div class="o-toggle">
+        <div class="o-toggle-row">
+          <div class="lbl">Défis activés</div>
+          <div class="switch"></div>
+        </div>
+        <div class="o-toggle-desc">Propose des micro-missions aux invités</div>
+      </div>
+      <div class="o-toggle">
+        <div class="o-toggle-row">
+          <div class="lbl">Mode nuit après 23h</div>
+          <div class="switch on"></div>
+        </div>
+        <div class="o-toggle-desc">Couleurs adoucies pour la fin de soirée</div>
+      </div>
+
+      <div class="o-actions">
+        <h3>Actions</h3>
+        <button class="o-export">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Exporter toute la mare
+          <span class="sub">.zip</span>
+        </button>
+      </div>
+
+      <div style="height:18px"></div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+
+  <!-- =========================================
+       06 — MARE TV · INSTRUCTIONS
+       ========================================= -->
+  <div class="col">
+    <div class="col-label"><span class="num">06</span>MARE TV · INSTRUCTIONS</div>
+    <div class="phone">
+      <div class="status-bar">
+        <span>21:08</span>
+        <div class="icons">
+          <svg width="13" height="8" viewBox="0 0 18 11"><rect x="1" y="6" width="3" height="4" rx=".5" fill="#1F2933"/><rect x="6" y="4" width="3" height="6" rx=".5" fill="#1F2933"/><rect x="11" y="2" width="3" height="8" rx=".5" fill="#1F2933"/></svg>
+          <svg width="20" height="9" viewBox="0 0 26 12"><rect x="1" y="1" width="22" height="10" rx="3" stroke="#1F2933" fill="none"/><rect x="3" y="3" width="14" height="6" rx="1.5" fill="#1F2933"/><rect x="24" y="4" width="1.5" height="4" rx=".5" fill="#1F2933"/></svg>
+        </div>
+      </div>
+      <div class="header-row">
+        <div class="brand">The <span class="y">Pond</span>.</div>
+      </div>
+      <div class="sub-section">
+        <h2>Mare TV</h2>
+        <p>L'écran de la mare en direct</p>
+      </div>
+
+      <div class="tv-stage">
+        <div class="live">live</div>
+        <div class="tv-set">
+          <div class="tv-duck">
+            <svg width="44" height="34" viewBox="0 0 64 50"><use href="#duck-glyph"/></svg>
+          </div>
+        </div>
+        <div class="tv-base"></div>
+      </div>
+
+      <div class="explain">
+        <div class="head">
+          <span class="num-tag">1</span>
+          <h4>Qu'est-ce que c'est&nbsp;?</h4>
+        </div>
+        <p class="body">Mare TV diffuse les barbotages en direct sur un écran de la salle. C'est un avant-goût de la soirée — sans pouvoir zoomer ni revenir en arrière.</p>
+      </div>
+
+      <div class="explain">
+        <div class="head">
+          <span class="num-tag">2</span>
+          <h4>Comment l'installer&nbsp;?</h4>
+        </div>
+        <p class="body">Scanne ce QR code avec un autre appareil connecté à la TV pour lancer le diffuseur.</p>
+        <div class="qr-wrap">
+          <div class="qr-pattern">
+            <div class="qr-corner"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="explain">
+        <div class="head">
+          <span class="num-tag">3</span>
+          <h4>Cette fonctionnalité<br/>est facultative</h4>
+        </div>
+        <p class="body">Si la salle n'a pas d'écran disponible, ce n'est pas grave — tous les souvenirs se révèleront sur ton téléphone.</p>
+      </div>
+
+      <div class="back-bottom">
+        <span class="back-link" style="padding:0">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 6 9 12 15 18"/></svg>
+          Retour à la mare
+        </span>
+      </div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
