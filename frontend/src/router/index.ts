@@ -21,32 +21,20 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/upload',
     name: 'upload',
-    component: StubView,
-    meta: {
-      title: 'Upload',
-      screen: 'UploadView',
-      implementedAt: 8,
-    },
+    component: () => import('../views/UploadView.vue'),
+    meta: { title: 'Upload' },
   },
   {
     path: '/upload/clip',
     name: 'upload-clip',
-    component: StubView,
-    meta: {
-      title: 'Cancaner',
-      screen: 'ClipCaptureView',
-      implementedAt: 8,
-    },
+    component: () => import('../views/ClipCaptureView.vue'),
+    meta: { title: 'Cancaner' },
   },
   {
     path: '/upload/voice',
     name: 'upload-voice',
-    component: StubView,
-    meta: {
-      title: 'Faire coin-coin',
-      screen: 'VoiceCaptureView',
-      implementedAt: 8,
-    },
+    component: () => import('../views/VoiceCaptureView.vue'),
+    meta: { title: 'Faire coin-coin' },
   },
   {
     path: '/confirmation',
