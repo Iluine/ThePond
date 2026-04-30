@@ -1,0 +1,49 @@
+/*
+ * Design system v0.2 — variables CSS
+ *
+ * Source de vérité : design/Welcome v2.html, Upload v2.html, Confirmation.html,
+ * Mosaic 4 screens.html, Mosaic 6 screens.html, Slideshow TV v2.html.
+ *
+ * Toute valeur ajoutée ici DOIT exister dans au moins une maquette HTML.
+ */
+
+:root {
+  /* ─── Pond (bleu profond, signature) ─────────────────────── */
+  --pond-deep:      #0E4F6B;
+  --pond-deeper:    #062E40;
+  --pond-mid:       #3E8AA8;
+  --pond-light:     #A9D8E5;
+  --pond-pale:      #E6F3F8;
+
+  /* ─── Cream (fonds chauds) ───────────────────────────────── */
+  --cream:          #FAF3E3;
+  --cream-deep:     #F2E8CF;
+  --cream-line:     #EADFB8;
+
+  /* ─── Duck (CTA primaire) ────────────────────────────────── */
+  --duck:           #FFC93C;
+  --duck-deep:      #F2B400;
+
+  /* ─── Champagne (RÉSERVÉ aux mariées + révélations) ──────── */
+  --champagne:      #E8C77A;
+  --champagne-pale: #F6EAC4;
+  --champagne-deep: #C9A347;
+
+  /* ─── Coral (RÉSERVÉ destructif + accents vocaux) ───────── */
+  --coral-soft:     #F8D9CF;
+  --coral-deep:     #B85A3F;
+  --coral-line:     #EDB7A4;
+
+  /* ─── Système / signaux ──────────────────────────────────── */
+  --rec-red:        #E14B3F;  /* point rouge enregistrement */
+  --green:          #5BA85B;  /* validation, palier passé */
+
+  /* ─── Texte ──────────────────────────────────────────────── */
+  --ink:            #1F2933;
+  --ink-soft:       #5A6B7A;
+
+  /* ─── Typographies ───────────────────────────────────────── */
+  --display: "Caprasimo", "Cooper Black", Georgia, serif;
+  --sans:    "DM Sans", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --mono:    "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
