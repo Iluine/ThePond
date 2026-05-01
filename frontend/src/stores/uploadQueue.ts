@@ -1,36 +1,38 @@
 /**
- * useUploadQueueStore — queue locale d'uploads avec runner intégré.
+ * useUploadQueueStore — queue d'uploads offline-first.
  *
- * Persistance hybride :
- *   - Les MÉTADONNÉES (id, type, statut, taille, ...) sont en localStorage
- *     pour qu'on puisse afficher "tu as N uploads en cours" même après
- *     un reload de la page.
- *   - Les FILES eux-mêmes restent en mémoire (Map non-réactive). Les
- *     File objects ne sont pas JSON-serializables, et stocker en base64
- *     coûterait beaucoup pour un cas d'usage rare (page rechargée pendant
- *     un upload). Au reload, les items qui étaient pending/uploading
- *     basculent sur statut 'lost' — l'UI peut alors proposer de
- *     re-sélectionner le fichier.
+ * Persistance complète dans IndexedDB (metadata + Blob), via
+ * `services/uploadDb.ts`. Survit aux reloads et aux fermetures d'onglet.
  *
- * enqueue() lance immédiatement runUpload() en fire-and-forget pour que
- * la navigation /confirmation soit instantanée (optimistic UI). Le statut
- * passe pending → uploading → done|failed sans bloquer l'appelant.
+ * Le runner respecte `navigator.onLine` :
+ *   - online + pending  → POST immédiat
+ *   - offline           → reste en pending, retry automatique au retour
+ *                         de l'événement `online` (cf. installAutoRetry)
+ *
+ * `enqueue()` fire-and-forget pour préserver l'optimistic UI (la
+ * navigation /confirmation est immédiate).
+ *
+ * Statut 'lost' n'est plus utilisé activement — il subsiste comme valeur
+ * possible si IDB est invalidé par le browser, mais en condition normale
+ * on bascule directement entre pending → uploading → done|failed.
  */
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useUserStore } from './user'
+import {
+  putUpload,
+  getAllUploads,
+  deleteUpload as dbDelete,
+  clearUploads as dbClear,
+  type PendingUploadRow,
+  type UploadKind,
+  type UploadStatus,
+} from '../services/uploadDb'
+import { onReconnect } from '../composables/useNetworkStatus'
 
-export type UploadType = 'photo' | 'clip' | 'voice'
+export type UploadType = UploadKind
+export type { UploadStatus }
 
-export type UploadStatus =
-  | 'pending'   // dans la queue, pas encore envoyé
-  | 'uploading' // POST en cours
-  | 'done'      // backend a confirmé
-  | 'failed'    // erreur réseau ou serveur, retry possible
-  | 'lost'      // page reloadée pendant le upload, File perdu
-
-/** Réponse minimale renvoyée par le backend après un upload réussi.
- *  Les filenames servent à construire l'URL des thumbnails côté client. */
 export type UploadServerResponse = {
   id: string
   filename?: string
@@ -42,14 +44,10 @@ export type UploadItem = {
   type: UploadType
   fileMeta: { name: string; size: number; mimeType: string }
   status: UploadStatus
-  /** ISO timestamp */
   createdAt: string
   errorMessage?: string
-  /** Pour les clips et vocaux. */
   durationSeconds?: number
-  /** Pour les vocaux uniquement (≤ 280 chars validé côté backend). */
   caption?: string
-  /** Présent une fois status === 'done'. Persiste à travers les reloads. */
   serverResponse?: UploadServerResponse
 }
 
@@ -58,48 +56,96 @@ export type EnqueueOptions = {
   caption?: string
 }
 
-const STORAGE_KEY = 'thepond.uploadQueue.v1'
-
 const ENDPOINT_FOR: Record<UploadType, string> = {
   photo: '/api/media',
   clip: '/api/clips',
   voice: '/api/voice',
 }
 
+const MAX_RETRIES = 5
+
+function rowToItem(row: PendingUploadRow): UploadItem {
+  return {
+    id: row.id,
+    type: row.kind,
+    fileMeta: {
+      name: row.fileName,
+      size: row.size,
+      mimeType: row.mimeType,
+    },
+    status: row.status,
+    createdAt: row.createdAt,
+    errorMessage: row.errorMessage,
+    durationSeconds: row.durationSeconds,
+    caption: row.caption,
+    serverResponse: row.serverResponse,
+  }
+}
+
 export const useUploadQueueStore = defineStore('uploadQueue', () => {
-  // ─── Files (mémoire seule) ──────────────────────────────────
-  const fileMap = new Map<string, File>()
+  const items = ref<UploadItem[]>([])
+  const blobs = new Map<string, Blob>()
+  let rehydrated = false
+  let autoRetryInstalled = false
 
-  // ─── Persistance des métadonnées ────────────────────────────
-  function loadMetadata(): UploadItem[] {
+  // ─── Boot rehydrate ─────────────────────────────────────────
+  async function rehydrate(): Promise<void> {
+    if (rehydrated) return
+    rehydrated = true
     try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      return raw ? (JSON.parse(raw) as UploadItem[]) : []
-    } catch {
-      return []
+      const rows = await getAllUploads()
+      for (const row of rows) {
+        // Tout ce qui était 'uploading' au moment d'un crash redevient
+        // 'pending' pour être re-tenté au prochain runner tick.
+        if (row.status === 'uploading') {
+          row.status = 'pending'
+          await putUpload(row)
+        }
+        blobs.set(row.id, row.blob)
+        items.value.push(rowToItem(row))
+      }
+    } catch (err) {
+      console.warn('[uploadQueue] rehydrate failed', err)
+    }
+    installAutoRetry()
+    // Tente immédiatement de drainer la queue si on est online.
+    if (typeof navigator === 'undefined' || navigator.onLine) {
+      void drainPending()
     }
   }
 
-  function persist(): void {
+  function installAutoRetry(): void {
+    if (autoRetryInstalled) return
+    autoRetryInstalled = true
+    onReconnect(() => {
+      void drainPending()
+    })
+  }
+
+  /** Relance tous les items pending. Appelé au boot et sur 'online'. */
+  async function drainPending(): Promise<void> {
+    const pendings = items.value.filter(
+      (i) => i.status === 'pending' || i.status === 'failed',
+    )
+    for (const item of pendings) {
+      // Skip les failed qui ont dépassé MAX_RETRIES
+      const row = await tryGetRow(item.id)
+      if (row && row.retries >= MAX_RETRIES && item.status === 'failed') continue
+      // Sequentiel pour ne pas saturer le backend en cas de 50 items.
+      await runUpload(item.id)
+    }
+  }
+
+  async function tryGetRow(id: string): Promise<PendingUploadRow | undefined> {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items.value))
+      const rows = await getAllUploads()
+      return rows.find((r) => r.id === id)
     } catch {
-      /* localStorage indisponible ou plein */
+      return undefined
     }
   }
 
-  // ─── State ──────────────────────────────────────────────────
-  const items = ref<UploadItem[]>(loadMetadata())
-
-  // Au boot, tout ce qui était en transit a perdu son File.
-  for (const item of items.value) {
-    if (item.status === 'pending' || item.status === 'uploading') {
-      item.status = 'lost'
-    }
-  }
-  persist()
-
-  // ─── Getters dérivés ────────────────────────────────────────
+  // ─── Getters ────────────────────────────────────────────────
   const pending   = computed(() => items.value.filter((i) => i.status === 'pending'))
   const uploading = computed(() => items.value.filter((i) => i.status === 'uploading'))
   const failed    = computed(() => items.value.filter((i) => i.status === 'failed'))
@@ -108,14 +154,13 @@ export const useUploadQueueStore = defineStore('uploadQueue', () => {
   const active    = computed(() =>
     items.value.filter((i) => i.status !== 'done'),
   )
+  /** Compteur agrégé "X en attente" affiché dans la pill UI. */
+  const inFlightCount = computed(
+    () => pending.value.length + uploading.value.length + failed.value.length,
+  )
 
-  // ─── Actions ────────────────────────────────────────────────
+  // ─── Mutations ──────────────────────────────────────────────
 
-  /**
-   * Ajoute un fichier à la queue et lance immédiatement son upload en
-   * background. L'appelant peut naviguer vers /confirmation tout de suite
-   * et observer l'évolution du statut via getById().
-   */
   function enqueue(
     file: File,
     type: UploadType,
@@ -135,10 +180,24 @@ export const useUploadQueueStore = defineStore('uploadQueue', () => {
       durationSeconds: opts?.durationSeconds,
       caption: opts?.caption,
     }
-    fileMap.set(id, file)
+    blobs.set(id, file)
     items.value.push(item)
-    persist()
-    // Fire-and-forget : on ne bloque pas l'appelant.
+
+    // Persist async (don't block UI).
+    void putUpload({
+      id,
+      kind: type,
+      blob: file,
+      fileName: file.name,
+      mimeType: file.type,
+      size: file.size,
+      status: 'pending',
+      retries: 0,
+      createdAt: item.createdAt,
+      durationSeconds: opts?.durationSeconds,
+      caption: opts?.caption,
+    })
+
     void runUpload(id)
     return item
   }
@@ -147,50 +206,69 @@ export const useUploadQueueStore = defineStore('uploadQueue', () => {
     return items.value.find((i) => i.id === id)
   }
 
-  function getFile(id: string): File | undefined {
-    return fileMap.get(id)
+  function getFile(id: string): Blob | undefined {
+    return blobs.get(id)
   }
 
-  function setStatus(
+  async function setStatus(
     id: string,
     status: UploadStatus,
-    errorMessage?: string,
-  ): void {
+    extra?: { errorMessage?: string; serverResponse?: UploadServerResponse },
+  ): Promise<void> {
     const item = items.value.find((i) => i.id === id)
     if (!item) return
     item.status = status
-    item.errorMessage = errorMessage
+    item.errorMessage = extra?.errorMessage
+    if (extra?.serverResponse) item.serverResponse = extra.serverResponse
+
     if (status === 'done') {
-      // Libère le File mais GARDE le serverResponse pour l'UI
-      fileMap.delete(id)
+      // L'item ne sert plus de queue work : on libère la place.
+      blobs.delete(id)
+      items.value = items.value.filter((i) => i.id !== id)
+      try { await dbDelete(id) } catch { /* idempotent */ }
+      return
     }
-    persist()
+
+    // Sinon on persiste l'évolution.
+    const row = await tryGetRow(id)
+    if (row) {
+      row.status = status
+      row.errorMessage = extra?.errorMessage
+      if (status === 'failed') row.retries += 1
+      try { await putUpload(row) } catch { /* idempotent */ }
+    }
   }
 
-  /** Lance l'upload pour un item. POST sur l'endpoint approprié,
-   *  met à jour le statut et stocke la réponse serveur en cas de succès. */
   async function runUpload(id: string): Promise<void> {
     const item = items.value.find((i) => i.id === id)
     if (!item) return
-    const file = fileMap.get(id)
-    if (!file) {
-      setStatus(id, 'lost')
+    if (item.status === 'uploading' || item.status === 'done') return
+
+    const blob = blobs.get(id)
+    if (!blob) {
+      await setStatus(id, 'lost')
+      return
+    }
+
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      // Offline : on garde 'pending' et le retry auto sur 'online' fera
+      // le job. Pas de tentative bruyante.
       return
     }
 
     const userStore = useUserStore()
     const userId = userStore.userId
     if (!userId) {
-      setStatus(id, 'failed', 'pas de canard authentifié')
+      await setStatus(id, 'failed', { errorMessage: 'pas de canard authentifié' })
       return
     }
 
-    setStatus(id, 'uploading')
+    await setStatus(id, 'uploading')
 
     try {
       const formData = new FormData()
       formData.append('user_id', userId)
-      formData.append('file', file)
+      formData.append('file', blob, item.fileMeta.name)
       if ((item.type === 'clip' || item.type === 'voice') && item.durationSeconds !== undefined) {
         formData.append('duration_seconds', item.durationSeconds.toFixed(2))
       }
@@ -207,40 +285,34 @@ export const useUploadQueueStore = defineStore('uploadQueue', () => {
         throw new Error(body.error || `HTTP ${res.status}`)
       }
       const serverResponse = (await res.json()) as UploadServerResponse
-
-      const itemRef = items.value.find((i) => i.id === id)
-      if (itemRef) {
-        itemRef.serverResponse = serverResponse
-      }
-      setStatus(id, 'done')
+      await setStatus(id, 'done', { serverResponse })
     } catch (err) {
-      setStatus(id, 'failed', err instanceof Error ? err.message : String(err))
+      const msg = err instanceof Error ? err.message : String(err)
+      await setStatus(id, 'failed', { errorMessage: msg })
     }
   }
 
-  /** Relance un upload qui a échoué. Le File doit toujours être en
-   *  mémoire (sinon le statut serait déjà 'lost'). */
   function retry(id: string): void {
     const item = items.value.find((i) => i.id === id)
     if (!item || (item.status !== 'failed' && item.status !== 'lost')) return
-    if (!fileMap.has(id)) {
-      setStatus(id, 'lost')
+    if (!blobs.has(id)) {
+      void setStatus(id, 'lost')
       return
     }
     item.errorMessage = undefined
     void runUpload(id)
   }
 
-  function dismiss(id: string): void {
-    fileMap.delete(id)
+  async function dismiss(id: string): Promise<void> {
+    blobs.delete(id)
     items.value = items.value.filter((i) => i.id !== id)
-    persist()
+    try { await dbDelete(id) } catch { /* idempotent */ }
   }
 
-  function clear(): void {
-    fileMap.clear()
+  async function clear(): Promise<void> {
+    blobs.clear()
     items.value = []
-    persist()
+    try { await dbClear() } catch { /* idempotent */ }
   }
 
   return {
@@ -251,10 +323,11 @@ export const useUploadQueueStore = defineStore('uploadQueue', () => {
     lost,
     done,
     active,
+    inFlightCount,
+    rehydrate,
     enqueue,
     getById,
     getFile,
-    setStatus,
     retry,
     dismiss,
     clear,

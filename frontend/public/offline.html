@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0E4F6B" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>The Pond. — pas de réseau</title>
+    <style>
+      :root {
+        --pond-deep: #0e4f6b;
+        --pond-mid: #3e8aa8;
+        --cream: #faf3e3;
+        --cream-deep: #f2e8cf;
+        --duck: #ffc93c;
+        --duck-deep: #f2b400;
+        --ink: #1f2933;
+        --ink-soft: #495260;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { height: 100%; }
+      body {
+        font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+        background: var(--cream);
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        line-height: 1.45;
+      }
+      main {
+        max-width: 360px;
+        text-align: center;
+      }
+      .duck {
+        width: 140px;
+        height: 140px;
+        margin: 0 auto 24px;
+        display: block;
+      }
+      h1 {
+        font-family: 'Caprasimo', Georgia, serif;
+        font-size: 30px;
+        line-height: 1.1;
+        color: var(--pond-deep);
+        margin-bottom: 12px;
+      }
+      h1 .accent { color: var(--duck-deep); }
+      p {
+        color: var(--ink-soft);
+        font-size: 15px;
+        margin-bottom: 24px;
+      }
+      button {
+        appearance: none;
+        background: var(--duck);
+        color: var(--ink);
+        border: none;
+        border-radius: 14px;
+        padding: 14px 26px;
+        font-size: 15px;
+        font-weight: 700;
+        font-family: inherit;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        cursor: pointer;
+        box-shadow: 0 4px 0 var(--duck-deep);
+        transition: transform 0.1s ease, box-shadow 0.1s ease;
+      }
+      button:active {
+        transform: translateY(2px);
+        box-shadow: 0 2px 0 var(--duck-deep);
+      }
+      .hint {
+        margin-top: 18px;
+        font-family: 'DM Mono', ui-monospace, monospace;
+        font-size: 12px;
+        color: var(--pond-mid);
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <svg class="duck" viewBox="0 0 100 100" aria-hidden="true">
+        <ellipse cx="50" cy="74" rx="34" ry="4" fill="#1F2933" opacity=".12"/>
+        <ellipse cx="48" cy="56" rx="30" ry="14" fill="#FFC93C" stroke="#0E4F6B" stroke-width="1.5"/>
+        <ellipse cx="42" cy="62" rx="20" ry="6" fill="#FFE08A" opacity=".7"/>
+        <path d="M74 50 Q84 44 80 56 Q74 56 72 53 Z" fill="#F2B400" stroke="#0E4F6B" stroke-width="1.5"/>
+        <circle cx="68" cy="38" r="14" fill="#FFC93C" stroke="#0E4F6B" stroke-width="1.5"/>
+        <path d="M80 36 L90 40 L80 44 Z" fill="#F2B400" stroke="#0E4F6B" stroke-width="1.5"/>
+        <circle cx="72" cy="34" r="2.2" fill="#1F2933"/>
+        <circle cx="72.7" cy="33.4" r=".7" fill="#FAF3E3"/>
+        <path d="M40 48 Q48 42 56 50 Q50 56 40 54 Z" fill="#F2B400" stroke="#0E4F6B" stroke-width="1.5"/>
+      </svg>
+      <h1>Plus assez d'<span class="accent">eau</span></h1>
+      <p>Le réseau s'est asséché. Réessaie dans une seconde — la mare t'attend.</p>
+      <button type="button" onclick="location.reload()">Réessayer</button>
+      <p class="hint">Si tu as déjà capturé des souvenirs, ils sont en sécurité — ils partiront dès que ça revient.</p>
+    </main>
+  </body>
+</html>
