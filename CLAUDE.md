@@ -23,10 +23,13 @@ témoin. `git log --oneline` pour les détails ; topologie courante :
   (4 états calculés depuis le snapshot), ClipPlayer/VoicePlayer, Orchestration
   témoin. 3 stores Pinia (user, snapshot, uploadQueue) + 1 (witness) pour les
   témoins. SSE auto-mounté dans `App.vue` via `useEventStream()`.
-- **Hors scope V1 et pas encore livré** : `MareTVView` (kiosque TV) et
-  `MareTVInstructionsView` (prompt 13), `ErrorView` polish (prompt 15),
-  déploiement NAS (prompt 16). Likes / défis / réponses vocales en chaîne →
-  P1 explicite.
+- **Mare TV** : `MareTVView` (kiosque, rotation client-side) et
+  `MareTVInstructionsView` (QR de pairing via `qrcode` lib) livrés au
+  prompt 13.
+- **Restant V1** : prompt 14 (PWA install + iOS install sheet — actif sur
+  la branche, `InstallSheet.vue` en cours), prompt 15 (polish + ErrorView),
+  prompt 16 (déploiement NAS). Likes / défis / réponses vocales en chaîne
+  → P1 explicite.
 
 ## Vocabulaire NON négociable
 
@@ -60,9 +63,10 @@ Ne propose pas WebSocket, deltas, ou scheduler de paliers sans en discuter.
 
 ## Stack & conventions
 
-- Rust stable, Axum 0.7, Tokio, SQLx 0.8 — **runtime queries** (pas
-  `query!`/`query_as!` macros, donc pas de `.sqlx/` à committer ni
-  `SQLX_OFFLINE` à régler en dev)
+- Rust stable, Axum 0.7, Tokio, SQLx 0.8 — **runtime queries uniquement**
+  (feature `macros` activé dans `Cargo.toml` mais ON N'UTILISE PAS
+  `query!`/`query_as!`, donc pas de `.sqlx/` à committer ni `SQLX_OFFLINE`
+  à régler en dev)
 - Vue 3 Composition API exclusive (`<script setup lang="ts">`), Vite 7,
   Tailwind 3.4, Vue Router 4, Pinia, vite-plugin-pwa, EventSource natif
 - Code et commentaires en **anglais**, textes UI en **français**
@@ -78,6 +82,8 @@ cargo run                              # :3000, lit theme.ron + pseudo.ron
 cargo test                             # 7 tests (5 phase_logic + 2 pseudo)
 cargo test phase_logic                 # un module
 cargo build --quiet                    # build release-debug
+cargo fmt                              # formatage rustfmt
+cargo clippy -- -D warnings            # lint strict (convention projet)
 
 # Frontend
 cd frontend
@@ -172,6 +178,9 @@ Au prompt 12 (orchestration) on pourra créer les phases via UI à la place.
   même rediffuser le snapshot, mark_dirty quand même (idempotent).
 - **Vite proxy** route `/api`, `/events`, `/uploads` → backend localhost:3000.
   En prod, Caddy fait le même routing.
+- **MareTVInstructionsView** génère un QR de pairing côté client via la lib
+  `qrcode` (npm dep, pas de génération serveur). Le QR encode l'URL
+  `/mare-tv` cible — c'est le seul écran qui en utilise pour V1.
 
 ## Couleurs réservées (rappel)
 
@@ -189,6 +198,6 @@ Composant signature : bouton primaire physique avec
 
 V1 (avant 5 juin 2026) / P1 / P2 dans `PROJECT.md` § "Phases de
 développement". Les prompts thématiques 1 à 16 dans `BOOTSTRAP.md`
-§ "Après cette session" — actuellement faits jusqu'au 12. Prompts 13
-(Mare TV), 14 (PWA install + iOS sheet), 15 (polish + ErrorView),
-16 (déploiement NAS) restants.
+§ "Après cette session" — actuellement faits jusqu'au 13. Prompts 14
+(PWA install + iOS sheet), 15 (polish + ErrorView), 16 (déploiement NAS)
+restants.
