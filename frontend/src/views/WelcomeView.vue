@@ -19,6 +19,7 @@ import { useRouter } from 'vue-router'
 import Duck from '../components/Duck.vue'
 import Pond, { type PondDuck } from '../components/Pond.vue'
 import PrimaryButton from '../components/PrimaryButton.vue'
+import InstallSheet from '../components/InstallSheet.vue'
 import { useUserStore } from '../stores/user'
 import { useSnapshotStore } from '../stores/snapshot'
 import { useInstallPrompt } from '../composables/useInstallPrompt'
@@ -118,17 +119,42 @@ const eventName = 'Le mariage de Marie & Thomas'
 
 // ─── Install PWA ───────────────────────────────────────────────
 const installResult = ref<string | null>(null)
+const iosSheetOpen = ref(false)
+
+const SHEET_SEEN_KEY = 'thepond.installSheet.seen.v1'
+
 async function onInstall() {
   const outcome = await install()
   if (outcome === 'ios') {
-    // TODO prompt 14 : ouvrir une sheet d'instructions iOS dédiée
-    installResult.value = 'Sur iOS : utilise le menu Partager → "Sur l\'écran d\'accueil"'
+    iosSheetOpen.value = true
   } else if (outcome === 'accepted') {
     installResult.value = 'Installée !'
   } else if (outcome === 'dismissed') {
-    installResult.value = null // l'utilisateur a refusé, ne rien dire
+    installResult.value = null
   }
 }
+
+function onSheetClose() {
+  iosSheetOpen.value = false
+  try { localStorage.setItem(SHEET_SEEN_KEY, '1') } catch { /* ignore */ }
+}
+
+// Auto-show de la sheet sur première visite iOS Safari non-installé.
+// Skip si l'invité a déjà créé son canard (il connaît l'app) ou si la
+// sheet a déjà été vue/écartée.
+onMounted(() => {
+  if (!isIosLike.value) return
+  if (userStore.isAuthenticated) return
+  let alreadySeen = false
+  try { alreadySeen = localStorage.getItem(SHEET_SEEN_KEY) === '1' } catch { /* ignore */ }
+  if (alreadySeen) return
+  setTimeout(() => {
+    // Re-check au tick : la nav peut avoir bougé pendant le timeout.
+    if (!iosSheetOpen.value && !userStore.isAuthenticated) {
+      iosSheetOpen.value = true
+    }
+  }, 2000)
+})
 </script>
 
 <template>
@@ -269,6 +295,11 @@ async function onInstall() {
         {{ installResult }}
       </p>
     </div>
+
+    <!-- iOS install sheet : monté à la racine du body via Teleport.
+         Le flag SHEET_SEEN_KEY est posé via onSheetClose pour ne pas
+         re-spammer l'invité au prochain reload. -->
+    <InstallSheet :visible="iosSheetOpen" @close="onSheetClose" />
   </main>
 </template>
 
